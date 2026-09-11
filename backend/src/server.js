@@ -1,6 +1,11 @@
 const express = require("express");
 const cors = require("cors");
+
 require("dotenv").config();
+
+const spotifyTestRouter = require("./routes/spotifyTest");
+
+
 
 const app = express();
 
