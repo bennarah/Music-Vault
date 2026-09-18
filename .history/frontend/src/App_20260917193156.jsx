@@ -8,14 +8,7 @@ import Register from './pages/Register/Register';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Recommendations from './pages/Recommendations/Recommendations';
 
-import { useEffect } from "react";
-import { testBackendConnection } from "./services/api";
-
 function App() {
-  useEffect(() => {
-    testBackendConnection();
-  }, []);
-
   return (
     <Routes>
       <Route element={<Layout />}>

@@ -1,5 +1,3 @@
-//Configures Express and connects routes
-
 const express = require("express");
 const cors = require("cors");
 
@@ -11,7 +9,7 @@ const spotifyTestRoutes = require("./routes/spotifyTest");
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:3000"
+    origin: process.env.FRONT_END_URL
 }));
 app.use(express.json());
 

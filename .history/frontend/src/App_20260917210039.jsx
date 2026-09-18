@@ -12,10 +12,6 @@ import { useEffect } from "react";
 import { testBackendConnection } from "./services/api";
 
 function App() {
-  useEffect(() => {
-    testBackendConnection();
-  }, []);
-
   return (
     <Routes>
       <Route element={<Layout />}>
