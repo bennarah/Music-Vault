@@ -1,3 +1,5 @@
+//Defines the HTTP endpoint someone can call
+
 const express = require("express");
 const {
     testSpotifyConnection,
