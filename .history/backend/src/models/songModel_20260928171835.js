@@ -1,4 +1,4 @@
-const db = require("../../config/db");
+const db = require("../config/db");
 
 async function createSong(song) {
   const {
@@ -29,7 +29,7 @@ async function createSong(song) {
       explicit,
       spotify_url
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       spotifyId,
       title,

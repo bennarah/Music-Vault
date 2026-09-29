@@ -23,15 +23,3 @@ CREATE TABLE songs (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ON UPDATE CURRENT_TIMESTAMP
 );
-
-CREATE TABLE user_song_preferences (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  song_id INT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (song_id) REFERENCES songs(id),
-
-  UNIQUE (user_id, song_id)
-);

@@ -12,8 +12,6 @@ CREATE TABLE songs (
   album_name VARCHAR(255) NULL,
   album_image_url TEXT NULL,
 
-  genre VARCHAR(100) NULL,
-
   duration_ms INT NOT NULL,
   explicit BOOLEAN NOT NULL DEFAULT FALSE,
 
@@ -24,14 +22,7 @@ CREATE TABLE songs (
     ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE user_song_preferences (
+CREATE TABLE genres (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  song_id INT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (song_id) REFERENCES songs(id),
-
-  UNIQUE (user_id, song_id)
+  name VARCHAR(100) NOT NULL UNIQUE
 );
