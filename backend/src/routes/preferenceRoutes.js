@@ -62,4 +62,33 @@ router.get("/:userId", async (req, res) => {
     });
 });
 
+// DELETE /api/preferences/:id
+// Removes a stored song preference using its unique preference ID.
+router.delete("/:id", async (req, res) => {
+    // Read the preference ID supplied in the URL.
+    const { id } = req.params;
+
+    // Find the index of the preference that matches the requested ID.
+    const preferenceIndex = preferences.findIndex(
+        (preference) => preference.id === id
+    );
+
+    // If no matching preference exists, return a not found response.
+    if (preferenceIndex === -1) {
+        return res.status(404).json({
+            success: false,
+            message: "Preference not found.",
+        });
+    }
+
+    // Remove the matching preference from the temporary in-memory store.
+    const [removedPreference] = preferences.splice(preferenceIndex, 1);
+
+    // Return the deleted preference so the client can confirm what was removed.
+    res.status(200).json({
+        success: true,
+        preference: removedPreference,
+    });
+});
+
 module.exports = router;
