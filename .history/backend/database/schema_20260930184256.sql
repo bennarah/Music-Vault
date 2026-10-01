@@ -1,11 +1,3 @@
-USE music_vault;
-
-CREATE TABLE users (
-  user_id CHAR(36) PRIMARY KEY,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  spotify_id VARCHAR(100) NULL
-);
-
 CREATE TABLE songs (
   id INT AUTO_INCREMENT PRIMARY KEY,
 
@@ -30,6 +22,12 @@ CREATE TABLE songs (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE users (
+  user_id CHAR(36) PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  spotify_id VARCHAR(100) NULL
 );
 
 CREATE TABLE user_song_preferences (

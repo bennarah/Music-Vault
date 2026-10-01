@@ -1,11 +1,3 @@
-USE music_vault;
-
-CREATE TABLE users (
-  user_id CHAR(36) PRIMARY KEY,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  spotify_id VARCHAR(100) NULL
-);
-
 CREATE TABLE songs (
   id INT AUTO_INCREMENT PRIMARY KEY,
 
@@ -32,21 +24,20 @@ CREATE TABLE songs (
     ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE users (
+  user_id CHAR(36) PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  spotify_id VARCHAR(100) NULL
+);
+
 CREATE TABLE user_song_preferences (
   id INT AUTO_INCREMENT PRIMARY KEY,
-
-  user_id CHAR(36) NOT NULL,
+  user_id INT NOT NULL,
   song_id INT NOT NULL,
-
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-  FOREIGN KEY (user_id)
-    REFERENCES users(user_id)
-    ON DELETE CASCADE,
-
-  FOREIGN KEY (song_id)
-    REFERENCES songs(id)
-    ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (song_id) REFERENCES songs(id),
 
   UNIQUE (user_id, song_id)
 );

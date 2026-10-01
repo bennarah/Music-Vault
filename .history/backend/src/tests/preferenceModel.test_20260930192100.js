@@ -1,5 +1,5 @@
-const crypto = require("crypto");
 const db = require("../../config/db");
+const crypto = require("crypto");
 
 const {
   createSong
@@ -7,7 +7,8 @@ const {
 
 const {
   createPreference,
-  getPreferencesByUser
+  getPreferencesByUser,
+  deletePreference,
 } = require("../models/preferenceModel");
 
 describe("Preference Model", () => {
@@ -19,10 +20,9 @@ describe("Preference Model", () => {
 
   beforeAll(async () => {
     userId = crypto.randomUUID();
-
-    await db.execute(
-      `INSERT INTO users (user_id, email, spotify_id)
-       VALUES (?, ?, ?)`,
+    
+    const [userResult] = await db.execute(
+      "INSERT INTO users (user_id, email, spotify_id) VALUES (?, ?, ?)",
       [userId, testEmail, null]
     );
 
@@ -37,31 +37,25 @@ describe("Preference Model", () => {
       albumImageUrl: null,
       durationMs: 200000,
       explicit: false,
-      spotifyUrl: null
+      spotifyUrl: null,
     });
   });
 
   afterAll(async () => {
-    if (userId) {
-      await db.execute(
-        "DELETE FROM user_song_preferences WHERE user_id = ?",
-        [userId]
-      );
-    }
+    await db.execute(
+      "DELETE FROM user_song_preferences WHERE user_id = ?",
+      [userId]
+    );
 
-    if (songId) {
-      await db.execute(
-        "DELETE FROM songs WHERE id = ?",
-        [songId]
-      );
-    }
+    await db.execute(
+      "DELETE FROM songs WHERE id = ?",
+      [songId]
+    );
 
-    if (userId) {
-      await db.execute(
-        "DELETE FROM users WHERE user_id = ?",
-        [userId]
-      );
-    }
+    await db.execute(
+      "DELETE FROM users WHERE id = ?",
+      [userId]
+    );
 
     await db.end();
   });
@@ -72,5 +66,6 @@ describe("Preference Model", () => {
     const preferences = await getPreferencesByUser(userId);
 
     expect(preferences.length).toBeGreaterThan(0);
+    expect(preferences[0].title).toBe("Preference Test Song");
   });
 });
