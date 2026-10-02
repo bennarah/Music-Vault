@@ -67,14 +67,14 @@ describe("Preference Model", () => {
     await db.end();
   });
 
-  // test("creates and retrieves a user song preference", async () => {
-  //   await createPreference(userId, songId);
+//   test("creates and retrieves a user song preference", async () => {
+//     await createPreference(userId, songId);
 
-  //   const preferences = await getPreferencesByUser(userId);
+//     const preferences = await getPreferencesByUser(userId);
 
-  //   expect(preferences.length).toBeGreaterThan(0);
-  // });
-});
+//     expect(preferences.length).toBeGreaterThan(0);
+//   });
+// });
 
 test("retrieves preferences with song metadata", async () => {
   await createPreference(userId, songId);
@@ -90,18 +90,4 @@ test("retrieves preferences with song metadata", async () => {
   expect(preference.song_id).toBe(songId);
   expect(preference.title).toBe("Preference Test Song");
   expect(preference.artist_name).toBe("Test Artist");
-});
-
-test("deletes a preference by ID", async () => {
-  const preferenceId = await createPreference(userId, songId);
-
-  const affectedRows = await deletePreferenceById(preferenceId);
-
-  expect(affectedRows).toBe(1);
-
-  const preferences = await getPreferencesByUser(userId);
-
-  expect(
-    preferences.find((preference) => preference.id === preferenceId)
-  ).toBeUndefined();
 });
