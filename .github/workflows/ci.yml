@@ -12,27 +12,63 @@ on:
 jobs:
 
   backend:
-    name: Backend Build and Test
-    runs-on: ubuntu-latest
+  name: Backend Build and Test
+  runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
+  services:
+    mysql:
+      image: mysql:8.0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: "24"
-          cache: "npm"
-          cache-dependency-path: backend/package-lock.json
+      env:
+        MYSQL_DATABASE: musicvault_test
+        MYSQL_USER: musicvault
+        MYSQL_PASSWORD: testpassword
+        MYSQL_ROOT_PASSWORD: rootpassword
 
-      - name: Install backend dependencies
-        working-directory: backend
-        run: npm ci
+      ports:
+        - 3306:3306
 
-      - name: Run backend tests
-        working-directory: backend
-        run: npm test
+      options: >-
+        --health-cmd="mysqladmin ping -h localhost -prootpassword"
+        --health-interval=10s
+        --health-timeout=5s
+        --health-retries=10
+
+  env:
+    DB_HOST: 127.0.0.1
+    DB_PORT: 3306
+    DB_USER: musicvault
+    DB_PASSWORD: testpassword
+    DB_NAME: musicvault_test
+
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "24.21.0"
+        cache: "npm"
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install backend dependencies
+      working-directory: backend
+      run: npm ci
+
+    - name: Initialize test database
+      run: |
+        mysql \
+          --host=127.0.0.1 \
+          --port=3306 \
+          --user=musicvault \
+          --password=testpassword \
+          musicvault_test \
+          < backend/database/schema.sql
+
+    - name: Run backend tests
+      working-directory: backend
+      run: npm test
 
 
   frontend:
@@ -64,4 +100,3 @@ jobs:
         name: frontend-build-${{ github.run_number }}
         path: frontend/dist/
         retention-days: 30
-        
