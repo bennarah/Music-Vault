@@ -58,4 +58,36 @@ describe("Spotify track normalization", () => {
         });
     });
 
+    test("handles missing Spotify metadata safely", () => {
+        const rawTrack = {
+            id: "missing-data-track",
+        };
+
+        const result = normalizeTrack(rawTrack);
+
+        expect(result).toEqual({
+            spotifyId: "missing-data-track",
+            title: "Unknown Track",
+
+            artistId: null,
+            artistName: "Unknown Artist",
+
+            albumId: null,
+            albumName: null,
+            albumImageUrl: null,
+
+            durationMs: null,
+            explicit: false,
+
+            spotifyUrl: null,
+
+            genres: [],
+        });
+    });
+    
+    test("returns null for malformed input", () => {
+        expect(normalizeTrack(null)).toBeNull();
+        expect(normalizeTrack(undefined)).toBeNull();
+        expect(normalizeTrack("invalid")).toBeNull();
+    });
 });
