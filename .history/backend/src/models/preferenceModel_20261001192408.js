@@ -9,13 +9,13 @@ async function createPreference(userId, songId) {
   return result.insertId;
 }
 
-async function getPreferencesByUser(userId) {
+async function getPreferenceById(userId) {
   const [rows] = await db.execute(
     "SELECT * FROM user_song_preferences WHERE user_id = ?",
     [userId]
   );
 
-  return rows;
+  return rows[0] || null;
 }
 
 async function deletePreference(userId, songId) {
@@ -26,9 +26,3 @@ async function deletePreference(userId, songId) {
 
   return result.affectedRows;
 }
-
-module.exports = {
-  createPreference,
-  getPreferencesByUser,
-  deletePreference,
-};

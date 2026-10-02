@@ -2,8 +2,7 @@ USE music_vault;
 
 SHOW TABLES;
 
-DESCRIBE users;
-DESCRIBE user_song_preferences;
+DESCRIBE songs;
 
 CREATE TABLE IF NOT EXISTS users (
   user_id CHAR(36) PRIMARY KEY,
@@ -28,7 +27,7 @@ CREATE TABLE IF NOT EXISTS songs (
   -- Commented out for now
   -- genre VARCHAR(100) NULL,
   -- end of commented out genre field
-  genres JSON,
+  genre JSON,
 
   duration_ms INT NOT NULL,
   explicit BOOLEAN NOT NULL DEFAULT FALSE,

@@ -1,17 +1,12 @@
 USE music_vault;
 
-SHOW TABLES;
-
-DESCRIBE users;
-DESCRIBE user_song_preferences;
-
 CREATE TABLE IF NOT EXISTS users (
   user_id CHAR(36) PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
   spotify_id VARCHAR(100) NULL
 );
 
-CREATE TABLE IF NOT EXISTS songs (
+CREATE TABLE songs (
   id INT AUTO_INCREMENT PRIMARY KEY,
 
   spotify_id VARCHAR(100) NOT NULL UNIQUE,
@@ -25,10 +20,7 @@ CREATE TABLE IF NOT EXISTS songs (
   album_name VARCHAR(255) NULL,
   album_image_url TEXT NULL,
 
-  -- Commented out for now
-  -- genre VARCHAR(100) NULL,
-  -- end of commented out genre field
-  genres JSON,
+  genre VARCHAR(100) NULL,
 
   duration_ms INT NOT NULL,
   explicit BOOLEAN NOT NULL DEFAULT FALSE,
@@ -40,7 +32,7 @@ CREATE TABLE IF NOT EXISTS songs (
     ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS user_song_preferences (
+CREATE TABLE user_song_preferences (
   id INT AUTO_INCREMENT PRIMARY KEY,
 
   user_id CHAR(36) NOT NULL,

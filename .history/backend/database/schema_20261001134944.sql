@@ -1,10 +1,5 @@
 USE music_vault;
 
-SHOW TABLES;
-
-DESCRIBE users;
-DESCRIBE user_song_preferences;
-
 CREATE TABLE IF NOT EXISTS users (
   user_id CHAR(36) PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
@@ -25,10 +20,7 @@ CREATE TABLE IF NOT EXISTS songs (
   album_name VARCHAR(255) NULL,
   album_image_url TEXT NULL,
 
-  -- Commented out for now
-  -- genre VARCHAR(100) NULL,
-  -- end of commented out genre field
-  genres JSON,
+  genre VARCHAR(100) NULL,
 
   duration_ms INT NOT NULL,
   explicit BOOLEAN NOT NULL DEFAULT FALSE,
