@@ -61,5 +61,4 @@ module.exports = {
   createPreference,
   getPreferencesByUser,
   deletePreferenceById,
-  mapPreferenceRowToSong,
 }; 
