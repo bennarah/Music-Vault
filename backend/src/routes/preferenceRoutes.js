@@ -1,19 +1,49 @@
 const express = require("express");
-const crypto = require("crypto");
+
 const { validatePreference } = require("../utils/preferenceValidation");
+const {
+    createPreference,
+    getPreferencesByUser,
+    deletePreferenceById,
+} = require("../models/preferenceModel");
+const {
+    getSongBySpotifyId,
+} = require("../models/songModel");
 
 const router = express.Router();
 
-// Temporary in-memory storage for user song preferences.
-// This allows the Preference API to be developed and tested before
-// the team's database persistence layer is fully integrated.
-const preferences = [];
+// Converts a database preference row into the public Preference API format.
+function formatPreference(row) {
+    let genres = row.genres;
+
+    // MySQL JSON values may be returned as either a JSON string or an array,
+    // depending on the driver/environment.
+    if (typeof genres === "string") {
+        try {
+            genres = JSON.parse(genres);
+        } catch {
+            genres = [];
+        }
+    }
+
+    const genre =
+        Array.isArray(genres) && genres.length > 0
+            ? genres[0]
+            : null;
+
+    return {
+        id: row.id,
+        userId: row.user_id,
+        songId: row.spotify_id,
+        title: row.title,
+        artist: row.artist_name,
+        genre,
+    };
+}
 
 // POST /api/preferences
-// Creates and temporarily stores a new song preference for a user.
+// Creates a database-backed song preference for a user.
 router.post("/", async (req, res) => {
-    // Extract the preference fields defined in the Sprint 2 API contract.
-    // Genre is optional, so it defaults to null when it is not provided.
     const {
         userId,
         songId,
@@ -22,7 +52,7 @@ router.post("/", async (req, res) => {
         genre = null,
     } = req.body;
 
-    // Validate all required fields before creating the preference.
+    // Validate the request against the Sprint 2 Preference API contract.
     const validation = validatePreference({
         userId,
         songId,
@@ -37,74 +67,115 @@ router.post("/", async (req, res) => {
         });
     }
 
-    // Create the preference object and assign it a unique internal ID.
-    const preference = {
-        id: crypto.randomUUID(),
-        userId,
-        songId,
-        title,
-        artist,
-        genre,
-    };
+    try {
+        // The public API uses the Spotify song identifier.
+        // The preference table stores the internal numeric songs.id value,
+        // so look up the database song record first.
+        const song = await getSongBySpotifyId(songId);
 
-    // Temporarily save the preference in memory.
-    // This will later be replaced by the team's database persistence layer.
-    preferences.push(preference);
+        if (!song) {
+            return res.status(404).json({
+                success: false,
+                message: "Song not found.",
+            });
+        }
 
-    // Return the newly created preference to the client.
-    res.status(201).json({
-        success: true,
-        preference,
-    });
+        // Store the relationship using the user's Music Vault ID and
+        // the song's internal database ID.
+        const preferenceId = await createPreference(userId, song.id);
+
+        return res.status(201).json({
+            success: true,
+            preference: {
+                id: preferenceId,
+                userId,
+                songId,
+                title,
+                artist,
+                genre,
+            },
+        });
+    } catch (error) {
+        // The database unique constraint prevents the same user/song
+        // preference from being stored more than once.
+        if (error.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({
+                success: false,
+                message: "Preference already exists.",
+            });
+        }
+
+        // A foreign-key failure means the supplied Music Vault user
+        // does not exist in the database.
+        if (error.code === "ER_NO_REFERENCED_ROW_2") {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+
+        console.error("Failed to create preference:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to create preference.",
+        });
+    }
 });
 
 // GET /api/preferences/:userId
-// Retrieves all stored song preferences belonging to a specific user.
+// Retrieves a user's stored preferences and song metadata from MySQL.
 router.get("/:userId", async (req, res) => {
-    // Read the userId supplied as part of the URL.
     const { userId } = req.params;
 
-    // Filter the stored preferences so that only preferences belonging
-    // to the requested user are returned.
-    const userPreferences = preferences.filter(
-        (preference) => preference.userId === userId
-    );
+    try {
+        const rows = await getPreferencesByUser(userId);
 
-    // Return the user's preferences.
-    // If the user has no stored preferences, this returns an empty array.
-    res.status(200).json({
-        success: true,
-        preferences: userPreferences,
-    });
+        const preferences = rows.map(formatPreference);
+
+        return res.status(200).json({
+            success: true,
+            preferences,
+        });
+    } catch (error) {
+        console.error("Failed to retrieve preferences:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to retrieve preferences.",
+        });
+    }
 });
 
 // DELETE /api/preferences/:id
-// Removes a stored song preference using its unique preference ID.
+// Removes a stored preference using its database preference ID.
 router.delete("/:id", async (req, res) => {
-    // Read the preference ID supplied in the URL.
     const { id } = req.params;
 
-    // Find the index of the preference that matches the requested ID.
-    const preferenceIndex = preferences.findIndex(
-        (preference) => preference.id === id
-    );
+    try {
+        const affectedRows = await deletePreferenceById(id);
 
-    // If no matching preference exists, return a not found response.
-    if (preferenceIndex === -1) {
-        return res.status(404).json({
+        if (affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Preference not found.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            preference: {
+                id: Number(id),
+            },
+        });
+    } catch (error) {
+        console.error("Failed to delete preference:", error);
+
+        return res.status(500).json({
             success: false,
-            message: "Preference not found.",
+            message: "Unable to delete preference.",
         });
     }
-
-    // Remove the matching preference from the temporary in-memory store.
-    const [removedPreference] = preferences.splice(preferenceIndex, 1);
-
-    // Return the deleted preference so the client can confirm what was removed.
-    res.status(200).json({
-        success: true,
-        preference: removedPreference,
-    });
 });
 
 module.exports = router;
