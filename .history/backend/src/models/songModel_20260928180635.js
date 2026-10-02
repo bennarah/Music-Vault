@@ -1,4 +1,4 @@
-const db = require("../../config/db");
+const db = require("../config/db");
 
 async function createSong(song) {
   const {
@@ -9,7 +9,7 @@ async function createSong(song) {
     albumId,
     albumName,
     albumImageUrl,
-    genres,
+    genre,
     durationMs,
     explicit,
     spotifyUrl,
@@ -24,7 +24,7 @@ async function createSong(song) {
       album_id,
       album_name,
       album_image_url,
-      genres,
+      genre,
       duration_ms,
       explicit,
       spotify_url
@@ -38,7 +38,7 @@ async function createSong(song) {
       albumId,
       albumName,
       albumImageUrl,
-      JSON.stringify(genres || []),
+      genre,
       durationMs,
       explicit,
       spotifyUrl,
@@ -90,7 +90,7 @@ async function upsertSong(song) {
     albumId,
     albumName,
     albumImageUrl,
-    genres,
+    genre,
     durationMs,
     explicit,
     spotifyUrl,
@@ -105,7 +105,7 @@ async function upsertSong(song) {
       album_id,
       album_name,
       album_image_url,
-      genres,
+      genre,
       duration_ms,
       explicit,
       spotify_url
@@ -118,7 +118,7 @@ async function upsertSong(song) {
       album_id = VALUES(album_id),
       album_name = VALUES(album_name),
       album_image_url = VALUES(album_image_url),
-      genres = VALUES(genres),
+      genre = VALUES(genre),
       duration_ms = VALUES(duration_ms),
       explicit = VALUES(explicit),
       spotify_url = VALUES(spotify_url)`,
@@ -130,7 +130,7 @@ async function upsertSong(song) {
       albumId,
       albumName,
       albumImageUrl,
-      JSON.stringify(genres || []),
+      genre,
       durationMs,
       explicit,
       spotifyUrl,
