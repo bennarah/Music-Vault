@@ -1,0 +1,27 @@
+{
+  "id": "7pKfPomDEeI4TPT6EOYjn9",
+  "name": "Imagine - Remastered 2010",
+  "duration_ms": 187866,
+  "explicit": false,
+
+  "artists": [
+    {
+      "id": "example-artist-id",
+      "name": "John Lennon"
+    }
+  ],
+
+  "album": {
+    "id": "example-album-id",
+    "name": "Imagine",
+    "images": [
+      {
+        "url": "https://example.com/imagine-album-cover.jpg"
+      }
+    ]
+  },
+
+  "external_urls": {
+    "spotify": "https://open.spotify.com/track/7pKfPomDEeI4TPT6EOYjn9"
+  }
+}

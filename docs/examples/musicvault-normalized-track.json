@@ -1,0 +1,18 @@
+{
+  "spotifyId": "7pKfPomDEeI4TPT6EOYjn9",
+  "title": "Imagine - Remastered 2010",
+
+  "artistId": "example-artist-id",
+  "artistName": "John Lennon",
+
+  "albumId": "example-album-id",
+  "albumName": "Imagine",
+  "albumImageUrl": "https://example.com/imagine-album-cover.jpg",
+
+  "durationMs": 187866,
+  "explicit": false,
+
+  "spotifyUrl": "https://open.spotify.com/track/7pKfPomDEeI4TPT6EOYjn9",
+
+  "genres": []
+}
