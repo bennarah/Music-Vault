@@ -1,5 +1,6 @@
 const express = require("express");
 const crypto = require("crypto");
+const { validatePreference } = require("../utils/preferenceValidation");
 
 const router = express.Router();
 
@@ -20,6 +21,21 @@ router.post("/", async (req, res) => {
         artist,
         genre = null,
     } = req.body;
+
+    // Validate all required fields before creating the preference.
+    const validation = validatePreference({
+        userId,
+        songId,
+        title,
+        artist,
+    });
+
+    if (!validation.valid) {
+        return res.status(400).json({
+            success: false,
+            message: validation.message,
+        });
+    }
 
     // Create the preference object and assign it a unique internal ID.
     const preference = {
