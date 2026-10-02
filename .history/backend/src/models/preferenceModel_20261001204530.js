@@ -13,18 +13,30 @@ async function createPreference(userId, songId) {
 async function getPreferencesByUser(userId) {
   const [rows] = await db.execute(
     `SELECT
-       usp.id,
+       usp.id AS preference_id,
        usp.user_id,
        usp.song_id,
+       usp.created_at,
+
        s.spotify_id,
        s.title,
+       s.artist_id,
        s.artist_name,
        s.genres,
-       usp.created_at
+       s.album_id,
+       s.album_name,
+       s.album_image_url,
+       s.duration_ms,
+       s.explicit,
+       s.spotify_url
+
      FROM user_song_preferences usp
      JOIN songs s
-       ON s.id = usp.song_id
-     WHERE usp.user_id = ?`,
+       ON usp.song_id = s.id
+
+     WHERE usp.user_id = ?
+
+     ORDER BY usp.created_at DESC`,
     [userId]
   );
 
@@ -45,4 +57,4 @@ module.exports = {
   createPreference,
   getPreferencesByUser,
   deletePreferenceById,
-}; 
+};

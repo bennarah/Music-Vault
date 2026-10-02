@@ -8,7 +8,7 @@ const {
 const {
   createPreference,
   getPreferencesByUser,
-  deletePreferenceById,
+  deletePreference,
 } = require("../models/preferenceModel");
 
 describe("Preference Model", () => {

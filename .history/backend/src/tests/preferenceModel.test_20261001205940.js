@@ -8,7 +8,7 @@ const {
 const {
   createPreference,
   getPreferencesByUser,
-  deletePreferenceById,
+  deletePreference,
 } = require("../models/preferenceModel");
 
 describe("Preference Model", () => {
@@ -92,10 +92,6 @@ describe("Preference Model", () => {
   });
 
 test("deletes a preference by ID", async () => {
-  await db.execute(
-      "DELETE FROM user_song_preferences WHERE user_id = ? AND song_id = ?",
-      [userId, songId]
-    );
   const preferenceId = await createPreference(userId, songId);
 
   const affectedRows = await deletePreferenceById(preferenceId);

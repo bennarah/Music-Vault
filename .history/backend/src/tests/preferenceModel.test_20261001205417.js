@@ -8,7 +8,7 @@ const {
 const {
   createPreference,
   getPreferencesByUser,
-  deletePreferenceById,
+  deletePreference,
 } = require("../models/preferenceModel");
 
 describe("Preference Model", () => {
@@ -67,45 +67,27 @@ describe("Preference Model", () => {
     await db.end();
   });
 
-  // test("creates and retrieves a user song preference", async () => {
-  //   await createPreference(userId, songId);
+//   test("creates and retrieves a user song preference", async () => {
+//     await createPreference(userId, songId);
 
-  //   const preferences = await getPreferencesByUser(userId);
+//     const preferences = await getPreferencesByUser(userId);
 
-  //   expect(preferences.length).toBeGreaterThan(0);
-  // });
+//     expect(preferences.length).toBeGreaterThan(0);
+//   });
+// });
 
-  test("retrieves preferences with song metadata", async () => {
-    await createPreference(userId, songId);
-
-    const preferences = await getPreferencesByUser(userId);
-
-    expect(preferences.length).toBeGreaterThan(0);
-
-    const preference = preferences[0];
-
-    expect(preference.id).toBeDefined();
-    expect(preference.user_id).toBe(userId);
-    expect(preference.song_id).toBe(songId);
-    expect(preference.title).toBe("Preference Test Song");
-    expect(preference.artist_name).toBe("Test Artist");
-  });
-
-test("deletes a preference by ID", async () => {
-  await db.execute(
-      "DELETE FROM user_song_preferences WHERE user_id = ? AND song_id = ?",
-      [userId, songId]
-    );
-  const preferenceId = await createPreference(userId, songId);
-
-  const affectedRows = await deletePreferenceById(preferenceId);
-
-  expect(affectedRows).toBe(1);
+test("retrieves preferences with song metadata", async () => {
+  await createPreference(userId, songId);
 
   const preferences = await getPreferencesByUser(userId);
 
-  expect(
-    preferences.find((preference) => preference.id === preferenceId)
-   ).toBeUndefined();
-  });
+  expect(preferences.length).toBeGreaterThan(0);
+
+  const preference = preferences[0];
+
+  expect(preference.id).toBeDefined();
+  expect(preference.user_id).toBe(userId);
+  expect(preference.song_id).toBe(songId);
+  expect(preference.title).toBe("Preference Test Song");
+  expect(preference.artist_name).toBe("Test Artist");
 });
