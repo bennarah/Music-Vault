@@ -1,3 +1,11 @@
+const {
+    normalizeTrack,
+} = require("./spotifyNormalizer");
+
+const {
+    deduplicateTracks,
+} = require("../utils/deduplicateTracks");
+
 //Actually communicates with Spotify
 
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
@@ -105,9 +113,53 @@ async function testSpotifyConnection() {
   };
 }
 
+async function searchTracks(query, limit = 10) {
+    if (!query || typeof query !== "string") {
+        throw new Error("A Spotify search query is required.");
+    }
+
+    const token = await getClientCredentialsToken();
+
+    const params = new URLSearchParams({
+        q: query,
+        type: "track",
+        limit: String(limit),
+    });
+
+    const result = await spotifyRequest(
+        `/search?${params.toString()}`,
+        token.accessToken
+    );
+
+    const tracks = result.tracks?.items || [];
+
+    return deduplicateTracks(
+        tracks
+            .map(normalizeTrack)
+            .filter(Boolean)
+    );
+}
+
+async function getTrackById(spotifyId) {
+    if (!spotifyId) {
+        throw new Error("Spotify track ID is required.");
+    }
+
+    const token = await getClientCredentialsToken();
+
+    const track = await spotifyRequest(
+        `/tracks/${encodeURIComponent(spotifyId)}`,
+        token.accessToken
+    );
+
+    return normalizeTrack(track);
+}
+
 module.exports = {
-  validateSpotifyConfig,
-  getClientCredentialsToken,
-  spotifyRequest,
-  testSpotifyConnection,
+    validateSpotifyConfig,
+    getClientCredentialsToken,
+    spotifyRequest,
+    testSpotifyConnection,
+    searchTracks,
+    getTrackById,
 };
