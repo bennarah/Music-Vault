@@ -28,15 +28,11 @@ function calculateSimilarity(preferredSong, candidateSong) {
   const preferredGenres = preferredSong.genres || [];
   const candidateGenres = candidateSong.genres || [];
 
-  const sharedGenres = [
-    ...new Set(
-      preferredGenres.filter((genre) =>
-        candidateGenres.includes(genre)
-      )
-    ),
-  ];
+  const sharedGenres = preferredGenres.filter((genre) =>
+    candidateGenres.includes(genre)
+  );
 
-  score += Math.min(sharedGenres.length, 2) * 25;
+  score += sharedGenres.length * 25;
 
   // Similar duration
   if (
