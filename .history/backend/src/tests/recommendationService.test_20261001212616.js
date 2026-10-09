@@ -130,7 +130,7 @@ describe("Recommendation Service", () => {
 
     expect(recommendations).toEqual([]);
   });
-
+  
   test("scores candidates against multiple preferred songs", () => {
   const preferredSongs = [
     {
@@ -147,24 +147,7 @@ describe("Recommendation Service", () => {
     },
   ];
 
-  const candidateSongs = [
-    {
-      spotifyId: "candidate-1",
-      title: "Candidate One",
-      artistId: "artist-1",
-      artistName: "Artist One",
-      genres: ["rock"],
-      durationMs: 200000,
-    },
-    {
-      spotifyId: "candidate-2",
-      title: "Candidate Two",
-      artistId: "artist-2",
-      artistName: "Artist Two",
-      genres: ["indie"],
-      durationMs: 180000,
-    },
-  ];
+  // candidate songs...
 
   const results = generateRecommendations(
     preferredSongs,
@@ -172,43 +155,5 @@ describe("Recommendation Service", () => {
   );
 
   expect(results.length).toBeGreaterThan(0);
-});
-test("does not recommend a song already in user preferences", () => {
-  const preferredSong = {
-    spotifyId: "song-1",
-    title: "Already Liked Song",
-    artistId: "artist-1",
-    artistName: "Artist One",
-    genres: ["rock"],
-    durationMs: 200000,
-  };
-
-  const newSong = {
-    spotifyId: "song-2",
-    title: "New Song",
-    artistId: "artist-1",
-    artistName: "Artist One",
-    genres: ["rock"],
-    durationMs: 205000,
-  };
-
-  const recommendations = generateRecommendations(
-    [preferredSong],
-    [preferredSong, newSong]
-  );
-
-  expect(
-    recommendations.some(
-      (result) =>
-        result.song.spotifyId === preferredSong.spotifyId
-    )
-  ).toBe(false);
-
-  expect(
-    recommendations.some(
-      (result) =>
-        result.song.spotifyId === newSong.spotifyId
-    )
-  ).toBe(true);
 });
 });

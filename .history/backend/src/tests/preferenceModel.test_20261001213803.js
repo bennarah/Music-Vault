@@ -131,6 +131,6 @@ test("deletes a preference by ID", async () => {
     expect(song.title).toBe("Preference Test Song");
     expect(song.artistName).toBe("Test Artist");
     expect(song.genres).toBeDefined();
-    //expect(song.durationMs).toBe(200000);
+    expect(song.durationMs).toBe(200000);
   });
 });

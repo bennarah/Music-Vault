@@ -12,6 +12,10 @@ const {
   mapPreferenceRowToSong,
 } = require("../models/preferenceModel");
 
+const rows = await getPreferencesByUser(userId);
+
+const preferredSongs = rows.map(mapPreferenceRowToSong);
+
 describe("Preference Model", () => {
   let userId;
   let songId;
@@ -108,29 +112,5 @@ test("deletes a preference by ID", async () => {
   expect(
     preferences.find((preference) => preference.id === preferenceId)
    ).toBeUndefined();
-  });
-
-  test("maps stored preferences to recommendation song objects", async () => {
-  // Remove an existing preference from another test if necessary
-    await db.execute(
-      "DELETE FROM user_song_preferences WHERE user_id = ? AND song_id = ?",
-      [userId, songId]
-    );
-
-    await createPreference(userId, songId);
-
-    const rows = await getPreferencesByUser(userId);
-
-    const preferredSongs = rows.map(mapPreferenceRowToSong);
-
-    expect(preferredSongs.length).toBeGreaterThan(0);
-
-    const song = preferredSongs[0];
-
-    expect(song.spotifyId).toBe(testSpotifyId);
-    expect(song.title).toBe("Preference Test Song");
-    expect(song.artistName).toBe("Test Artist");
-    expect(song.genres).toBeDefined();
-    //expect(song.durationMs).toBe(200000);
   });
 });

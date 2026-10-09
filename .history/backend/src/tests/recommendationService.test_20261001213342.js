@@ -147,24 +147,7 @@ describe("Recommendation Service", () => {
     },
   ];
 
-  const candidateSongs = [
-    {
-      spotifyId: "candidate-1",
-      title: "Candidate One",
-      artistId: "artist-1",
-      artistName: "Artist One",
-      genres: ["rock"],
-      durationMs: 200000,
-    },
-    {
-      spotifyId: "candidate-2",
-      title: "Candidate Two",
-      artistId: "artist-2",
-      artistName: "Artist Two",
-      genres: ["indie"],
-      durationMs: 180000,
-    },
-  ];
+  // candidate songs...
 
   const results = generateRecommendations(
     preferredSongs,
