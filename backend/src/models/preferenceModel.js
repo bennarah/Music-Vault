@@ -1,12 +1,27 @@
 const db = require("../../config/db");
 
+
 function mapPreferenceRowToSong(row) {
+  let genres = row.genres;
+
+  if (typeof genres === "string") {
+    try {
+      genres = JSON.parse(genres);
+    } catch {
+      genres = [];
+    }
+  }
+
+  if (!Array.isArray(genres)) {
+    genres = [];
+  }
+
   return {
     spotifyId: row.spotify_id,
     title: row.title,
     artistId: row.artist_id,
     artistName: row.artist_name,
-    genres: row.genres || [],
+    genres,
     albumId: row.album_id,
     albumName: row.album_name,
     albumImageUrl: row.album_image_url,
@@ -26,6 +41,7 @@ async function createPreference(userId, songId) {
   return result.insertId;
 }
 
+
 async function getPreferencesByUser(userId) {
   const [rows] = await db.execute(
     `SELECT
@@ -34,8 +50,15 @@ async function getPreferencesByUser(userId) {
        usp.song_id,
        s.spotify_id,
        s.title,
+       s.artist_id,
        s.artist_name,
        s.genres,
+       s.album_id,
+       s.album_name,
+       s.album_image_url,
+       s.duration_ms,
+       s.explicit,
+       s.spotify_url,
        usp.created_at
      FROM user_song_preferences usp
      JOIN songs s
