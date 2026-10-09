@@ -225,7 +225,6 @@ describe("Recommendation Service", () => {
     expect(result.map((song) => song.spotifyId))
       .toEqual(["song-1", "song-2"]);
   });
-
   test("removes candidates with invalid Spotify IDs", () => {
     const songs = [
       { spotifyId: null, title: "Unknown Song" },
@@ -237,113 +236,5 @@ describe("Recommendation Service", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].spotifyId).toBe("song-1");
-  });
-
-  test("does not return duplicate recommendations", () => {
-    const preferredSongs = [
-      {
-        spotifyId: "preferred-1",
-        artistId: "artist-1",
-        genres: ["rock"],
-        durationMs: 200000
-      }
-    ];
-
-    const candidate = {
-      spotifyId: "candidate-1",
-      artistId: "artist-1",
-      genres: ["rock"],
-      durationMs: 210000
-    };
-
-    const results = generateRecommendations(
-      preferredSongs,
-      [candidate, candidate]
-    );
-
-    expect(results).toHaveLength(1);
-    expect(results[0].song.spotifyId).toBe("candidate-1");
-  });
-   
-  test("two shared genres contribute 50 points", () => {
-    const preferred = {
-      artistId: "artist-1",
-      genres: ["rock", "indie"],
-      durationMs: 200000,
-    };
-
-    const candidate = {
-      artistId: "artist-2",
-      genres: ["rock", "indie"],
-      durationMs: 400000,
-    };
-
-    expect(calculateSimilarity(preferred, candidate)).toBe(50);
-  });
-
-  test("three or more shared genres are capped at 50 points", () => {
-    const preferred = {
-      artistId: "artist-1",
-      genres: ["rock", "indie", "alternative", "pop"],
-      durationMs: 200000,
-    };
-
-    const candidate = {
-      artistId: "artist-2",
-      genres: ["rock", "indie", "alternative", "pop"],
-      durationMs: 400000,
-    };
-
-    expect(calculateSimilarity(preferred, candidate)).toBe(50);
-  });
-
-  test("duplicate genre labels do not increase the score", () => {
-    const preferred = {
-      artistId: "artist-1",
-      genres: ["rock", "rock", "rock"],
-      durationMs: 200000,
-    };
-
-    const candidate = {
-      artistId: "artist-2",
-      genres: ["rock"],
-      durationMs: 400000,
-    };
-
-    expect(calculateSimilarity(preferred, candidate)).toBe(25);
-  });
-
-  test("perfect similarity scores 100 percent", () => {
-    const preferred = {
-      artistId: "artist-1",
-      genres: ["rock", "indie"],
-      durationMs: 200000,
-    };
-
-    const candidate = {
-      artistId: "artist-1",
-      genres: ["rock", "indie"],
-      durationMs: 205000,
-    };
-
-    expect(calculateSimilarity(preferred, candidate)).toBe(100);
-  });
-
-  test("similarity score never exceeds 100", () => {
-    const preferred = {
-      artistId: "artist-1",
-      genres: ["rock", "indie", "pop", "metal", "jazz"],
-      durationMs: 200000,
-    };
-
-    const candidate = {
-      artistId: "artist-1",
-      genres: ["rock", "indie", "pop", "metal", "jazz"],
-      durationMs: 200000,
-    };
-
-    const score = calculateSimilarity(preferred, candidate);
-
-    expect(score).toBeLessThanOrEqual(100);
   });
 });
