@@ -12,6 +12,8 @@ const preferenceRoutes = require("./routes/preferenceRoutes");
 
 const app = express();
 
+const recommendationRoutes = require("./routes/recommendationRoutes");
+
 app.use(cors({
     origin: "http://localhost:3000"
 }));
@@ -22,5 +24,6 @@ app.use("/api/health", healthRoutes);
 app.use("/api/spotify-test", spotifyTestRoutes);
 app.use("/api/spotify", spotifyRoutes);
 app.use("/api/preferences", preferenceRoutes);
+app.use("/api/recommendations", recommendationRoutes);
 
 module.exports = app;
