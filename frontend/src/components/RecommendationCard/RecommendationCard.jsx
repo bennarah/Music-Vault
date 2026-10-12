@@ -11,7 +11,7 @@ function RecommendationCard({ recommendation }) {
 
         {recommendation.score != null && (
           <span className="recommendation-score">
-            {Math.round(recommendation.score * 100)}% match
+            {Math.round(recommendation.score)}% match
           </span>
         )}
       </div>

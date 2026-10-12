@@ -1,34 +1,20 @@
 
 import { useEffect, useState } from "react";
 import "./Recommendations.css";
-import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
 
-const mockRecommendations = [
-  {
-    id: 1,
-    title: "Midnight Drive",
-    artist: "The Echo Lines",
-    genre: "Alternative",
-    popularity: 42,
-    score: 0.91,
-  },
-  {
-    id: 2,
-    title: "Paper Satellites",
-    artist: "Northbound",
-    genre: "Indie Rock",
-    popularity: 35,
-    score: 0.84,
-  },
-  {
-    id: 3,
-    title: "Afterglow",
-    artist: "Velvet Static",
-    genre: null,
-    popularity: null,
-    score: 0.79,
-  },
-];
+import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
+import { getRecommendations } from "../../services/recommendationService";
+import { mockRecommendations } from "../../mocks/recommendations";
+
+// Use mock recommendations until live integration is ready.
+const useMockRecommendations =
+  import.meta.env.VITE_USE_MOCK_RECOMMENDATIONS === "true";
+
+// Temporary development-only user ID.
+// Replace with real user context when authentication is implemented.
+const devUserId = import.meta.env.DEV
+  ? import.meta.env.VITE_DEV_USER_ID
+  : undefined;
 
 function Recommendations() {
   const [recommendations, setRecommendations] = useState([]);
@@ -36,24 +22,51 @@ function Recommendations() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const loadRecommendations = async () => {
+    let active = true;
+
+    async function loadRecommendations() {
+      setLoading(true);
+      setError("");
+
       try {
-        setLoading(true);
-        setError("");
+        let results;
 
-        // Temporary mock while the backend recommendation endpoint
-        // remains unavailable.
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        if (useMockRecommendations) {
+          // Temporary mock data for frontend development.
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          results = mockRecommendations;
+        } else {
+          if (!devUserId) {
+            throw new Error(
+              "No development user ID is configured."
+            );
+          }
 
-        setRecommendations(mockRecommendations);
-      } catch {
-        setError("Unable to load recommendations.");
+          // Retrieve actual recommendations from Express/MySQL.
+          results = await getRecommendations(devUserId);
+        }
+
+        if (active) {
+          setRecommendations(results);
+        }
+      } catch (err) {
+        if (active) {
+          setRecommendations([]);
+          setError("Unable to load recommendations.");
+          console.error("Recommendation request failed:", err);
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
-    };
+    }
 
     loadRecommendations();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
@@ -91,9 +104,9 @@ function Recommendations() {
 
       {!loading && !error && recommendations.length > 0 && (
         <div className="recommendations-grid">
-          {recommendations.map((recommendation) => (
+          {recommendations.map((recommendation, index) => (
             <RecommendationCard
-              key={recommendation.id}
+              key={recommendation.id ?? index}
               recommendation={recommendation}
             />
           ))}
