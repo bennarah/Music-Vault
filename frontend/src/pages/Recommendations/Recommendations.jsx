@@ -70,7 +70,10 @@ function Recommendations() {
   }, []);
 
   return (
-    <section className="recommendations-page">
+    <section
+      className="recommendations-page"
+      aria-busy={loading}
+    >
       <div className="recommendations-header">
         <p className="recommendations-eyebrow">Music Vault</p>
         <h1>Your Recommendations</h1>
@@ -81,6 +84,10 @@ function Recommendations() {
 
       {loading && (
         <div className="recommendations-state" role="status">
+          <div
+            className="recommendations-spinner"
+            aria-hidden="true"
+          />
           <h2>Loading recommendations...</h2>
           <p>Please wait while Music Vault prepares your results.</p>
         </div>
