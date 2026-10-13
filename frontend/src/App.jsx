@@ -1,12 +1,16 @@
-import { Routes, Route } from 'react-router-dom';
 
-import Layout from './components/Layout/Layout';
+import { Routes, Route } from "react-router-dom";
 
-import Home from './pages/Home/Home';
-import Login from './pages/Login/Login';
-import Register from './pages/Register/Register';
-import Dashboard from './pages/Dashboard/Dashboard';
-import Recommendations from './pages/Recommendations/Recommendations';
+import Layout from "./components/Layout/Layout";
+
+import Home from "./pages/Home/Home";
+import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Recommendations from "./pages/Recommendations/Recommendations";
+
+// Song selection page
+import SongSelectionPage from "./pages/SongSelectionPage";
 
 import { useEffect } from "react";
 import { testBackendConnection } from "./services/api";
@@ -26,6 +30,12 @@ function App() {
         <Route
           path="/recommendations"
           element={<Recommendations />}
+        />
+
+        {/* Sprint 2: Song selection */}
+        <Route
+          path="/songs"
+          element={<SongSelectionPage />}
         />
       </Route>
     </Routes>
