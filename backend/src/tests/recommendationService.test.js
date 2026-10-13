@@ -4,6 +4,10 @@ const {
   removeDuplicateSongs,
 } = require("../services/recommendationService");
 
+const { 
+  normalizeTrack 
+} = require("../services/spotifyNormalizer");
+
 describe("Recommendation Service", () => {
   const preferredSong = {
     spotifyId: "preferred-1",
@@ -346,4 +350,43 @@ describe("Recommendation Service", () => {
 
     expect(score).toBeLessThanOrEqual(100);
   });
+
+  test("scores normalized Spotify candidates correctly", () => {
+    const rawTrack = {
+      id: "candidate-123",
+      name: "Example Song",
+      artists: [
+      { id: "artist-1", name: "Example Artist" }
+    ],
+    album: {
+      id: "album-1",
+      name: "Example Album",
+      images: []
+    },
+    duration_ms: 205000,
+    explicit: false,
+    external_urls: {
+      spotify: "https://open.spotify.com/track/candidate-123"
+    }
+  };
+
+  const candidate = normalizeTrack(rawTrack);
+
+  const preferredSongs = [
+    {
+      spotifyId: "preferred-123",
+      artistId: "artist-1",
+      genres: [],
+      durationMs: 200000
+    }
+  ];
+
+  const results = generateRecommendations(
+    preferredSongs,
+    [candidate]
+  );
+
+  expect(results).toHaveLength(1);
+  expect(results[0].score).toBe(50);
+});
 });
