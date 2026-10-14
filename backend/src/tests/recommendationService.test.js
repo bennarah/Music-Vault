@@ -370,23 +370,61 @@ describe("Recommendation Service", () => {
     }
   };
 
-  const candidate = normalizeTrack(rawTrack);
+    const candidate = normalizeTrack(rawTrack);
 
-  const preferredSongs = [
-    {
-      spotifyId: "preferred-123",
-      artistId: "artist-1",
+    const preferredSongs = [
+      {
+        spotifyId: "preferred-123",
+        artistId: "artist-1",
+        genres: [],
+        durationMs: 200000
+      }
+    ];
+
+    const results = generateRecommendations(
+      preferredSongs,
+      [candidate]
+    );
+
+    expect(results).toHaveLength(1);
+    expect(results[0].score).toBe(50);
+  });
+
+  test("generates recommendations from normalized Spotify tracks", () => {
+    const rawTrack = {
+      id: "candidate-001",
+      name: "Example Track",
+      artists: [
+        { id: "artist-001", name: "Example Artist" }
+      ],
+      album: {
+        id: "album-001",
+        name: "Example Album",
+        images: []
+      },
+      duration_ms: 205000,
+      explicit: false,
+      external_urls: {
+        spotify: "https://open.spotify.com/track/candidate-001"
+      }
+    };
+
+    const candidate = normalizeTrack(rawTrack);
+
+    const preferredSongs = [{
+      spotifyId: "preferred-001",
+      artistId: "artist-001",
       genres: [],
       durationMs: 200000
-    }
-  ];
+    }];
 
-  const results = generateRecommendations(
-    preferredSongs,
-    [candidate]
-  );
+    const results = generateRecommendations(
+      preferredSongs,
+      [candidate]
+    );
 
-  expect(results).toHaveLength(1);
-  expect(results[0].score).toBe(50);
-});
+    expect(results).toHaveLength(1);
+    expect(results[0].song.spotifyId).toBe("candidate-001");
+    expect(results[0].score).toBe(50);
+  });
 });
