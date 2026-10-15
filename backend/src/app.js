@@ -12,6 +12,9 @@ const preferenceRoutes = require("./routes/preferenceRoutes");
 
 const app = express();
 
+// Format JSON responses with 2-space indentation
+app.set("json spaces", 2);
+
 const allowedOrigins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
