@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Recommendations.css";
 
@@ -21,9 +21,13 @@ function Recommendations() {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
+
+  // Prevent updates from requests belonging to an older effect.
+  const requestId = useRef(0);
 
   useEffect(() => {
-    let active = true;
+    const currentRequest = ++requestId.current;
 
     async function loadRecommendations() {
       setLoading(true);
@@ -44,17 +48,17 @@ function Recommendations() {
           results = await getRecommendations(devUserId);
         }
 
-        if (active) {
+        if (currentRequest === requestId.current) {
           setRecommendations(results);
         }
       } catch (err) {
-        if (active) {
+        if (currentRequest === requestId.current) {
           setRecommendations([]);
           setError("Unable to load recommendations.");
           console.error("Recommendation request failed:", err);
         }
       } finally {
-        if (active) {
+        if (currentRequest === requestId.current) {
           setLoading(false);
         }
       }
@@ -63,9 +67,15 @@ function Recommendations() {
     loadRecommendations();
 
     return () => {
-      active = false;
+      requestId.current += 1;
     };
-  }, []);
+  }, [retryCount]);
+
+  function handleRetry() {
+    if (!loading) {
+      setRetryCount((count) => count + 1);
+    }
+  }
 
   return (
     <section
@@ -95,6 +105,13 @@ function Recommendations() {
         <div className="recommendations-state" role="alert">
           <h2>Something went wrong</h2>
           <p>{error}</p>
+          <button
+            type="button"
+            className="recommendations-retry-button"
+            onClick={handleRetry}
+          >
+            Try Again
+          </button>
         </div>
       )}
 
