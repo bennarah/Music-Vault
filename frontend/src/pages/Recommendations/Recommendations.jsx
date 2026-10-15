@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import "./Recommendations.css";
 
 import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
@@ -37,12 +38,9 @@ function Recommendations() {
           results = mockRecommendations;
         } else {
           if (!devUserId) {
-            throw new Error(
-              "No development user ID is configured."
-            );
+            throw new Error("No development user ID is configured.");
           }
 
-          // Retrieve actual recommendations from Express/MySQL.
           results = await getRecommendations(devUserId);
         }
 
@@ -101,11 +99,20 @@ function Recommendations() {
       )}
 
       {!loading && !error && recommendations.length === 0 && (
-        <div className="recommendations-state">
+        <div className="recommendations-state" role="status">
           <h2>No recommendations found</h2>
           <p>
-            Add more song preferences and try generating recommendations again.
+            We couldn't find any matching songs yet.
+            Try selecting more songs to help Music Vault
+            generate recommendations.
           </p>
+
+          <Link
+            to="/songs"
+            className="recommendations-empty-link"
+          >
+            Choose Songs
+          </Link>
         </div>
       )}
 
