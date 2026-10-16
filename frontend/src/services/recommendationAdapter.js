@@ -1,32 +1,60 @@
 
 /**
- * Converts a backend recommendation result into the format
- * expected by the RecommendationCard component.
+ * Normalizes backend recommendation data for the
+ * RecommendationCard component.
  *
- * Backend format:
+ * Expected backend format:
  * {
  *   song: { spotifyId, title, artistName, genres, ... },
  *   score: number
  * }
  */
 
+function safeText(value, fallback) {
+  return typeof value === "string" && value.trim()
+    ? value.trim()
+    : fallback;
+}
+
 export function normalizeRecommendation(result) {
-  const song = result?.song ?? {};
+  const song =
+    result?.song &&
+    typeof result.song === "object" &&
+    !Array.isArray(result.song)
+      ? result.song
+      : {};
 
   const genres = Array.isArray(song.genres)
     ? song.genres
     : [];
 
-  return {
-    id: song.spotifyId ?? null,
-    title: song.title || "Unknown title",
-    artist: song.artistName || "Unknown artist",
-    genre: genres[0] || null,
-    popularity: song.popularity ?? null,
+  const genre = genres.find(
+    (value) =>
+      typeof value === "string" &&
+      value.trim().length > 0
+  );
 
-    // Preserve the backend's raw score.
-    // The team is updating the algorithm to a 0–100 scale.
-    score: result?.score ?? null,
+  const popularity =
+    typeof song.popularity === "number" &&
+    Number.isFinite(song.popularity)
+      ? song.popularity
+      : null;
+
+  const score =
+    typeof result?.score === "number" &&
+    Number.isFinite(result.score) &&
+    result.score >= 0 &&
+    result.score <= 100
+      ? result.score
+      : null;
+
+  return {
+    id: safeText(song.spotifyId, null),
+    title: safeText(song.title, "Unknown title"),
+    artist: safeText(song.artistName, "Unknown artist"),
+    genre: genre ? genre.trim() : null,
+    popularity,
+    score,
   };
 }
 
