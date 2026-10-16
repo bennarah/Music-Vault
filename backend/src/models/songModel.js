@@ -75,10 +75,11 @@ async function getAllSongs() {
 }
 
 module.exports = {
-  createSong,
-  getSongById,
-  getSongBySpotifyId,
-  getAllSongs,
+    createSong,
+    getSongById,
+    getSongBySpotifyId,
+    getAllSongs,
+    upsertSong,
 };
 
 async function upsertSong(song) {
@@ -110,7 +111,7 @@ async function upsertSong(song) {
       explicit,
       spotify_url
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
       title = VALUES(title),
       artist_id = VALUES(artist_id),

@@ -12,6 +12,10 @@ const {
   generateRecommendations,
 } = require("../services/recommendationService");
 
+const {
+    prepareCandidates,
+} = require("../services/candidatePreparation");
+
 const router = express.Router();
 
 // Converts a database song row into the format expected
@@ -79,7 +83,17 @@ router.get("/:userId", async (req, res) => {
 
     // Retrieve candidate songs from the database.
     const songRows = await getAllSongs();
-    const candidateSongs = songRows.map(mapSongRow);
+
+    const normalizedCandidates = songRows.map(mapSongRow);
+
+    const selectedSongIds = preferredSongs
+        .map((song) => song.spotifyId)
+        .filter(Boolean);
+
+    const candidateSongs = prepareCandidates(
+        normalizedCandidates,
+        selectedSongIds
+    );
 
     // Reuse Adam's existing similarity/ranking algorithm.
     const recommendations = generateRecommendations(
