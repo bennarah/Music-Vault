@@ -1,14 +1,19 @@
-const {
-    searchTracks,
-} = require("./spotifyService");
-
-const {
-    deduplicateTracks,
-} = require("../utils/deduplicateTracks");
 
 const { searchTracks } = require("./spotifyService");
-const { prepareCandidates } = require("./candidatePreparation");
 
+const {
+    prepareCandidates,
+} = require("./candidatePreparation");
+
+/**
+ * Retrieve candidate songs from Spotify and prepare
+ * them for the recommendation algorithm.
+ *
+ * @param {string} query - Spotify search query
+ * @param {string[]} selectedSongIds - Songs already liked
+ * @param {number} limit - Maximum Spotify search results
+ * @returns {Promise<object[]>} Prepared candidate songs
+ */
 async function getCandidateSongs(
     query,
     selectedSongIds = [],
@@ -22,8 +27,6 @@ async function getCandidateSongs(
 
     return prepareCandidates(tracks, selectedSongIds);
 }
-
-module.exports = { getCandidateSongs };
 
 module.exports = {
     getCandidateSongs,
