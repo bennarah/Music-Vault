@@ -63,6 +63,22 @@ describe("Recommendation Service", () => {
     expect(score).toBe(10);
   });
 
+  test("does not award duration points when duration is missing", () => {
+    const preferred = {
+      artistId: "artist-1",
+      genres: [],
+      durationMs: null
+    };
+
+    const candidate = {
+      artistId: "artist-2",
+      genres: [],
+      durationMs: null
+    };
+
+    expect(calculateSimilarity(preferred, candidate)).toBe(0);
+  });
+
   test("returns zero when songs have no similarity", () => {
     const candidateSong = {
       spotifyId: "candidate-4",
@@ -137,47 +153,56 @@ describe("Recommendation Service", () => {
   });
 
   test("scores candidates against multiple preferred songs", () => {
-  const preferredSongs = [
-    {
-      spotifyId: "preferred-1",
-      artistId: "artist-1",
-      genres: ["rock"],
-      durationMs: 200000,
-    },
-    {
-      spotifyId: "preferred-2",
-      artistId: "artist-2",
-      genres: ["indie"],
-      durationMs: 180000,
-    },
-  ];
+    const preferredSongs = [
+      {
+        spotifyId: "preferred-1",
+        artistId: "artist-1",
+        genres: ["rock"],
+        durationMs: 200000,
+      },
+      {
+        spotifyId: "preferred-2",
+        artistId: "artist-2",
+        genres: ["indie"],
+        durationMs: 180000,
+      },
+    ];
 
-  const candidateSongs = [
-    {
-      spotifyId: "candidate-1",
-      title: "Candidate One",
-      artistId: "artist-1",
-      artistName: "Artist One",
-      genres: ["rock"],
-      durationMs: 200000,
-    },
-    {
-      spotifyId: "candidate-2",
-      title: "Candidate Two",
-      artistId: "artist-2",
-      artistName: "Artist Two",
-      genres: ["indie"],
-      durationMs: 180000,
-    },
-  ];
+    const candidateSongs = [
+      {
+        spotifyId: "candidate-1",
+        title: "Candidate One",
+        artistId: "artist-1",
+        artistName: "Artist One",
+        genres: ["rock"],
+        durationMs: 200000,
+      },
+      {
+        spotifyId: "candidate-2",
+        title: "Candidate Two",
+        artistId: "artist-2",
+        artistName: "Artist Two",
+        genres: ["indie"],
+        durationMs: 180000,
+      },
+    ];
 
-  const results = generateRecommendations(
-    preferredSongs,
-    candidateSongs
-  );
+    const results = generateRecommendations(
+      preferredSongs,
+      candidateSongs
+    );
 
-  expect(results.length).toBeGreaterThan(0);
+    expect(results).toHaveLength(2);
+
+    expect(results.find(
+      result => result.song.spotifyId === "candidate-1"
+    )?.score).toBe(75);
+
+    expect(results.find(
+      result => result.song.spotifyId === "candidate-2"
+    )?.score).toBe(75);
 });
+
   test("does not recommend a song already in user preferences", () => {
     const preferredSong = {
       spotifyId: "song-1",
@@ -216,6 +241,7 @@ describe("Recommendation Service", () => {
       )
     ).toBe(true);
   });
+  
   test("removes duplicate songs by Spotify ID", () => {
     const songs = [
       { spotifyId: "song-1", title: "Song A" },
@@ -426,5 +452,43 @@ describe("Recommendation Service", () => {
     expect(results).toHaveLength(1);
     expect(results[0].song.spotifyId).toBe("candidate-001");
     expect(results[0].score).toBe(50);
+  });
+
+  test("produces identical rankings for identical inputs", () => {
+    const preferredSongs = [
+      {
+        spotifyId: "preferred-1",
+        artistId: "artist-1",
+        genres: ["rock"],
+        durationMs: 200000
+      }
+    ];
+
+    const candidateSongs = [
+      {
+        spotifyId: "candidate-1",
+        artistId: "artist-1",
+        genres: ["rock"],
+        durationMs: 205000
+      },
+      {
+        spotifyId: "candidate-2",
+        artistId: "artist-2",
+        genres: ["rock"],
+        durationMs: 220000
+      }
+    ];
+
+    const firstRun = generateRecommendations(
+      preferredSongs,
+      candidateSongs
+    );
+
+    const secondRun = generateRecommendations(
+      preferredSongs,
+      candidateSongs
+    );
+
+    expect(secondRun).toEqual(firstRun);
   });
 });
