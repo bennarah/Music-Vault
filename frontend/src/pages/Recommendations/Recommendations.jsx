@@ -1,5 +1,6 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import "./Recommendations.css";
 
 import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
@@ -20,9 +21,13 @@ function Recommendations() {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
+
+  // Prevent updates from requests belonging to an older effect.
+  const requestId = useRef(0);
 
   useEffect(() => {
-    let active = true;
+    const currentRequest = ++requestId.current;
 
     async function loadRecommendations() {
       setLoading(true);
@@ -37,26 +42,23 @@ function Recommendations() {
           results = mockRecommendations;
         } else {
           if (!devUserId) {
-            throw new Error(
-              "No development user ID is configured."
-            );
+            throw new Error("No development user ID is configured.");
           }
 
-          // Retrieve actual recommendations from Express/MySQL.
           results = await getRecommendations(devUserId);
         }
 
-        if (active) {
+        if (currentRequest === requestId.current) {
           setRecommendations(results);
         }
       } catch (err) {
-        if (active) {
+        if (currentRequest === requestId.current) {
           setRecommendations([]);
           setError("Unable to load recommendations.");
           console.error("Recommendation request failed:", err);
         }
       } finally {
-        if (active) {
+        if (currentRequest === requestId.current) {
           setLoading(false);
         }
       }
@@ -65,9 +67,15 @@ function Recommendations() {
     loadRecommendations();
 
     return () => {
-      active = false;
+      requestId.current += 1;
     };
-  }, []);
+  }, [retryCount]);
+
+  function handleRetry() {
+    if (!loading) {
+      setRetryCount((count) => count + 1);
+    }
+  }
 
   return (
     <section
@@ -97,15 +105,31 @@ function Recommendations() {
         <div className="recommendations-state" role="alert">
           <h2>Something went wrong</h2>
           <p>{error}</p>
+          <button
+            type="button"
+            className="recommendations-retry-button"
+            onClick={handleRetry}
+          >
+            Try Again
+          </button>
         </div>
       )}
 
       {!loading && !error && recommendations.length === 0 && (
-        <div className="recommendations-state">
+        <div className="recommendations-state" role="status">
           <h2>No recommendations found</h2>
           <p>
-            Add more song preferences and try generating recommendations again.
+            We couldn't find any matching songs yet.
+            Try selecting more songs to help Music Vault
+            generate recommendations.
           </p>
+
+          <Link
+            to="/songs"
+            className="recommendations-empty-link"
+          >
+            Choose Songs
+          </Link>
         </div>
       )}
 
