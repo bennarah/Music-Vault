@@ -12,6 +12,7 @@ const preferredSongs = [
   }
 ];
 
+// Function to calculate similarity score between two songs
 function calculateSimilarity(preferredSong, candidateSong) {
   let score = 0;
 
