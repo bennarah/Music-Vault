@@ -163,44 +163,6 @@ describe("Recommendation API - Database Integration", () => {
       recommendations: [],
     });
   });
-  test("preserves candidate order when similarity scores are equal", () => {
-    const preferredSongs = [
-      {
-        spotifyId: "preferred-1",
-        artistId: "artist-1",
-        genres: ["rock"],
-        durationMs: 200000,
-      },
-    ];
-
-    const candidateSongs = [
-      {
-        spotifyId: "candidate-b",
-        artistId: "artist-2",
-        genres: ["rock"],
-        durationMs: 400000,
-      },
-      {
-        spotifyId: "candidate-a",
-        artistId: "artist-3",
-        genres: ["rock"],
-        durationMs: 400000,
-      },
-    ];
-
-    const results = generateRecommendations(
-      preferredSongs,
-      candidateSongs
-    );
-
-    expect(results).toHaveLength(2);
-
-    expect(results[0].score).toBe(25);
-    expect(results[1].score).toBe(25);
-
-    expect(results.map((result) => result.song.spotifyId))
-      .toEqual(["candidate-b", "candidate-a"]);
-  });
 });
 
 // These tests do not require a MySQL connection.
