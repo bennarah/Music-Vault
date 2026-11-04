@@ -49,6 +49,32 @@
   margin: 0;
 }
 
+/* Prevent long song metadata from overflowing cards */
+.recommendation-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Allow the song information to shrink within the heading */
+.recommendation-card-heading > div {
+  min-width: 0;
+}
+
+/* Keep song titles and artist names inside the card */
+.recommendation-card-heading h2,
+.recommendation-card-heading p {
+  overflow-wrap: anywhere;
+}
+
+/* Prevent metadata values from stretching the details grid */
+.recommendation-details > div {
+  min-width: 0;
+}
+
+.recommendation-details dd {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 600px) {
   .recommendation-card-heading {
     flex-direction: column;
