@@ -1,0 +1,60 @@
+
+.recommendation-card {
+  border: 1px solid #d7d7d7;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.recommendation-card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.recommendation-card-heading h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.2rem;
+}
+
+.recommendation-card-heading p {
+  margin: 0;
+}
+
+.recommendation-score {
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.recommendation-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+}
+
+.recommendation-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.recommendation-details dt {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.recommendation-details dd {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .recommendation-card-heading {
+    flex-direction: column;
+  }
+
+  .recommendation-details {
+    grid-template-columns: 1fr;
+  }
+}
