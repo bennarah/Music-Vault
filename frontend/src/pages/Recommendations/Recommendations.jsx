@@ -17,6 +17,23 @@ const devUserId = import.meta.env.DEV
   ? import.meta.env.VITE_DEV_USER_ID
   : undefined;
 
+function getRecommendationErrorMessage(error) {
+  const message = error?.message || "";
+
+  if (message === "No development user ID is configured.") {
+    return "No development user is configured. Check your frontend environment settings.";
+  }
+
+  if (
+    message.includes("Failed to fetch") ||
+    message.includes("NetworkError")
+  ) {
+    return "Could not connect to the Music Vault backend. Please check that the server is running.";
+  }
+
+  return "Unable to load recommendations. Please try again.";
+}
+
 function Recommendations() {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +71,7 @@ function Recommendations() {
       } catch (err) {
         if (currentRequest === requestId.current) {
           setRecommendations([]);
-          setError("Unable to load recommendations.");
+          setError(getRecommendationErrorMessage(err));
           console.error("Recommendation request failed:", err);
         }
       } finally {
