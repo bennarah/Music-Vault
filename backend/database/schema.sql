@@ -1,10 +1,12 @@
+
+-- ============================================================
 -- MusicVault Database Schema
+-- ============================================================
+-- Local development: music_vault
+-- CI environment: musicvault_test
 --
--- This file defines the tables required by the MusicVault backend.
--- The database itself is selected by the environment running this script.
---
--- Local development may use: music_vault
--- CI may use: musicvault_test
+-- Select the database before executing this script.
+-- ============================================================
 
 
 -- ============================================================
@@ -15,7 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_id CHAR(36) PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     spotify_id VARCHAR(100) NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- ============================================================
@@ -38,7 +40,8 @@ CREATE TABLE IF NOT EXISTS songs (
 
     genres JSON NULL,
 
-    duration_ms INT NOT NULL,
+    -- Spotify metadata may be unavailable.
+    duration_ms INT NULL,
 
     explicit BOOLEAN NOT NULL DEFAULT FALSE,
 
@@ -48,7 +51,8 @@ CREATE TABLE IF NOT EXISTS songs (
 
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP
-);
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- ============================================================
@@ -75,4 +79,5 @@ CREATE TABLE IF NOT EXISTS user_song_preferences (
 
     CONSTRAINT uq_user_song_preference
         UNIQUE (user_id, song_id)
-);
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
