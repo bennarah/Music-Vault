@@ -80,33 +80,40 @@ describe("Recommendation API - Database Integration", () => {
 
   afterAll(async () => {
     // Clean up in foreign-key-safe order.
-    // Cleanup is attempted even if setup failed partway through.
     try {
-      await db.execute(
-        "DELETE FROM user_song_preferences WHERE user_id IN (?, ?)",
-        [userId, emptyUserId]
-      );
+        await db.execute(
+            "DELETE FROM user_song_preferences WHERE user_id IN (?, ?)",
+            [userId, emptyUserId]
+        );
 
-      if (createdSongIds.length > 0) {
-        const placeholders = createdSongIds
-          .map(() => "?")
-          .join(", ");
+        if (createdSongIds.length > 0) {
+            const placeholders = createdSongIds
+                .map(() => "?")
+                .join(", ");
+
+            await db.execute(
+                `DELETE FROM songs WHERE id IN (${placeholders})`,
+                createdSongIds
+            );
+        }
 
         await db.execute(
-          `DELETE FROM songs WHERE id IN (${placeholders})`,
-          createdSongIds
+            "DELETE FROM users WHERE user_id IN (?, ?)",
+            [userId, emptyUserId]
         );
-      }
 
-      await db.execute(
-        "DELETE FROM users WHERE user_id IN (?, ?)",
-        [userId, emptyUserId]
-      );
     } catch (error) {
-      // Avoid hiding the original setup error if MySQL is unavailable.
-      console.error("Recommendation test cleanup failed:", error.message);
+        console.error(
+            "Recommendation test cleanup failed:",
+            error.message
+        );
+
+    } finally {
+        // Always close the MySQL connection pool,
+        // even if database cleanup fails.
+        await db.end();
     }
-  });
+});
 
   test("returns ranked recommendations with 0-100 similarity scores", async () => {
     const response = await request(app)

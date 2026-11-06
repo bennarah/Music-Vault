@@ -7,7 +7,7 @@ const {
 } = require("../models/preferenceModel");
 
 const {
-    getAllSongs,
+    getCandidateSongsForUser,
 } = require("../models/songModel");
 
 const {
@@ -65,7 +65,7 @@ function mapSongRow(row) {
 router.get("/:userId", async (req, res) => {
     const { userId } = req.params;
 
-    // Music Vault user IDs use UUID format.
+    // Validate MusicVault user ID format.
 
     const validUserId =
         typeof userId === "string" &&
@@ -79,6 +79,7 @@ router.get("/:userId", async (req, res) => {
     }
 
     // Create an opt-in performance recorder.
+
     const metrics = createPerformanceMetrics(
         "recommendation_generation"
     );
@@ -128,14 +129,17 @@ router.get("/:userId", async (req, res) => {
         );
 
         // ------------------------------------------------
-        // 3. Retrieve candidate songs from MySQL.
+        // 3. Retrieve candidates directly from MySQL.
+        //
+        // Already-preferred songs are excluded by the
+        // database query using NOT EXISTS.
         // ------------------------------------------------
 
         metrics.incrementCount("databaseQueries");
 
         const songRows = await metrics.measure(
             "candidateQuery",
-            () => getAllSongs()
+            () => getCandidateSongsForUser(userId)
         );
 
         metrics.setCount(
@@ -152,10 +156,11 @@ router.get("/:userId", async (req, res) => {
             () => songRows.map(mapSongRow)
         );
 
-        // Identify songs already selected by the user.
+        // Build preferred Spotify ID list.
+        // Retained as a defensive check during preparation.
 
         const selectedSongIds = preferredSongs
-            .map((song) => song.spotifyId)
+            .map(song => song.spotifyId)
             .filter(Boolean);
 
         // ------------------------------------------------
@@ -205,7 +210,8 @@ router.get("/:userId", async (req, res) => {
         });
 
     } catch (error) {
-        // Record failure without including sensitive data.
+        // Record failure without including sensitive data
+        // in the performance metrics.
 
         metrics.finish({
             outcome: "error",
