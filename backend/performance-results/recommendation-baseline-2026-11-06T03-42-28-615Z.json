@@ -1,0 +1,97 @@
+{
+  "testName": "MusicVault recommendation API baseline",
+  "capturedAt": "2026-11-06T03:42:28.613Z",
+  "endpoint": "/api/recommendations/[test-user-id]",
+  "note": "End-to-end HTTP timings include network, Express, database, candidate preparation, ranking, and response serialization. They do not isolate individual database or algorithm timings.",
+  "configuration": {
+    "measuredRequests": 10,
+    "warmupRequests": 2,
+    "timeoutMs": 15000,
+    "emptyResultsAllowed": false
+  },
+  "summary": {
+    "measuredRequests": 10,
+    "warmupRequests": 2,
+    "averageMs": 1.49,
+    "medianMs": 1.27,
+    "p95Ms": 2.99,
+    "minimumMs": 0.82,
+    "maximumMs": 2.99,
+    "recommendationCountsObserved": [
+      2
+    ],
+    "allHttpResponsesSuccessful": true
+  },
+  "measurements": [
+    {
+      "request": 1,
+      "phase": "measured",
+      "durationMs": 1.55,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    },
+    {
+      "request": 2,
+      "phase": "measured",
+      "durationMs": 2.99,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    },
+    {
+      "request": 3,
+      "phase": "measured",
+      "durationMs": 1.74,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    },
+    {
+      "request": 4,
+      "phase": "measured",
+      "durationMs": 1.3,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    },
+    {
+      "request": 5,
+      "phase": "measured",
+      "durationMs": 1.1,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    },
+    {
+      "request": 6,
+      "phase": "measured",
+      "durationMs": 1.05,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    },
+    {
+      "request": 7,
+      "phase": "measured",
+      "durationMs": 1.25,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    },
+    {
+      "request": 8,
+      "phase": "measured",
+      "durationMs": 2.1,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    },
+    {
+      "request": 9,
+      "phase": "measured",
+      "durationMs": 1.02,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    },
+    {
+      "request": 10,
+      "phase": "measured",
+      "durationMs": 0.82,
+      "httpStatus": 200,
+      "recommendationCount": 2
+    }
+  ]
+}
