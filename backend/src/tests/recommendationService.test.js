@@ -529,4 +529,27 @@ describe("Recommendation Service", () => {
     expect(results.map((result) => result.song.spotifyId))
       .toEqual(["candidate-b", "candidate-a"]);
   });
+  test("handles malformed genre metadata safely", () => {
+    const preferredSongs = [
+      {
+        spotifyId: "preferred-1",
+        artistId: "artist-1",
+        genres: "rock",
+        durationMs: 200000,
+      },
+    ];
+
+    const candidateSongs = [
+      {
+        spotifyId: "candidate-1",
+        artistId: "artist-1",
+        genres: ["rock"],
+        durationMs: 205000,
+      },
+    ];
+
+    expect(() =>
+      generateRecommendations(preferredSongs, candidateSongs)
+    ).not.toThrow();
+  });
 });

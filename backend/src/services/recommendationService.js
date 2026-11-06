@@ -25,9 +25,15 @@ function calculateSimilarity(preferredSong, candidateSong) {
     score += 40;
   }
 
+  
   // Shared genres
-  const preferredGenres = preferredSong.genres || [];
-  const candidateGenres = candidateSong.genres || [];
+  const preferredGenres = Array.isArray(preferredSong.genres)
+    ? preferredSong.genres
+    : [];
+
+  const candidateGenres = Array.isArray(candidateSong.genres)
+    ? candidateSong.genres
+    : [];
 
   const sharedGenres = [
     ...new Set(
