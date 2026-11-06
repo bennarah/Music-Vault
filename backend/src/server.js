@@ -1,7 +1,11 @@
-// Starts the Express server
-
 const app = require("./app");
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => {console.log(`Music Vault API running on port ${PORT}`); });
+const server = app.listen(PORT, () => {
+    console.log(`Music Vault API running on port ${PORT}`);
+});
+
+server.on("error", (error) => {
+    console.error("Server failed:", error);
+});
