@@ -6,6 +6,7 @@ const {
     testSpotifyConnection,
     searchTracks,
     getTrackById,
+    resetSpotifyTokenCache,
 } = require("../src/services/spotifyService");
 
 function mockResponse(body, status = 200) {
@@ -19,17 +20,25 @@ function mockResponse(body, status = 200) {
 describe("Spotify Service", () => {
     let fetchSpy;
 
-    const originalClientId = process.env.SPOTIFY_CLIENT_ID;
-    const originalClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    const originalClientId =
+        process.env.SPOTIFY_CLIENT_ID;
+
+    const originalClientSecret =
+        process.env.SPOTIFY_CLIENT_SECRET;
 
     beforeEach(() => {
         process.env.SPOTIFY_CLIENT_ID = "test-client-id";
         process.env.SPOTIFY_CLIENT_SECRET = "test-client-secret";
 
+        // Prevent cached tokens from affecting other tests.
+        resetSpotifyTokenCache();
+
         fetchSpy = jest.spyOn(global, "fetch");
     });
 
     afterEach(() => {
+        resetSpotifyTokenCache();
+
         jest.restoreAllMocks();
 
         if (originalClientId === undefined) {
@@ -76,9 +85,7 @@ describe("Spotify Service", () => {
     });
 
     test("requests a Spotify client credentials token", async () => {
-        fetchSpy.mockResolvedValue(
-            tokenResponse()
-        );
+        fetchSpy.mockResolvedValue(tokenResponse());
 
         const result = await getClientCredentialsToken();
 
@@ -108,6 +115,104 @@ describe("Spotify Service", () => {
         expect(
             new URLSearchParams(options.body).get("grant_type")
         ).toBe("client_credentials");
+    });
+
+    test("reuses a cached token instead of requesting another", async () => {
+        fetchSpy.mockResolvedValue(tokenResponse());
+
+        const firstToken =
+            await getClientCredentialsToken();
+
+        const secondToken =
+            await getClientCredentialsToken();
+
+        expect(firstToken).toEqual(secondToken);
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test("refreshes an expired token", async () => {
+        jest.spyOn(Date, "now")
+            .mockReturnValue(100000);
+
+        fetchSpy
+            .mockResolvedValueOnce(tokenResponse())
+            .mockResolvedValueOnce(
+                mockResponse({
+                    access_token: "refreshed-access-token",
+                    token_type: "Bearer",
+                    expires_in: 3600,
+                })
+            );
+
+        const firstToken =
+            await getClientCredentialsToken();
+
+        expect(firstToken.accessToken).toBe(
+            "mock-access-token"
+        );
+
+        // Advance beyond the cached token expiration.
+        Date.now.mockReturnValue(4100000);
+
+        const secondToken =
+            await getClientCredentialsToken();
+
+        expect(secondToken.accessToken).toBe(
+            "refreshed-access-token"
+        );
+
+        expect(fetchSpy).toHaveBeenCalledTimes(2);
+    });
+
+    test("shares one token request between concurrent callers", async () => {
+        fetchSpy.mockResolvedValue(tokenResponse());
+
+        const results = await Promise.all([
+            getClientCredentialsToken(),
+            getClientCredentialsToken(),
+            getClientCredentialsToken(),
+        ]);
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+        expect(results).toHaveLength(3);
+
+        expect(results[0].accessToken).toBe(
+            "mock-access-token"
+        );
+
+        expect(results[1]).toEqual(results[0]);
+        expect(results[2]).toEqual(results[0]);
+    });
+
+    test("does not cache failed authentication responses", async () => {
+        fetchSpy
+            .mockResolvedValueOnce(
+                mockResponse(
+                    {
+                        error: "invalid_client",
+                        error_description: "Invalid credentials",
+                    },
+                    401
+                )
+            )
+            .mockResolvedValueOnce(tokenResponse());
+
+        await expect(
+            getClientCredentialsToken()
+        ).rejects.toThrow(
+            "Spotify authentication failed (401)"
+        );
+
+        const result =
+            await getClientCredentialsToken();
+
+        expect(result.accessToken).toBe(
+            "mock-access-token"
+        );
+
+        expect(fetchSpy).toHaveBeenCalledTimes(2);
     });
 
     test("handles Spotify authentication failures", async () => {
@@ -233,7 +338,6 @@ describe("Spotify Service", () => {
         expect(result[1].spotifyId).toBe("track-002");
 
         const searchUrl = fetchSpy.mock.calls[1][0];
-
         const parsedUrl = new URL(searchUrl);
 
         expect(parsedUrl.searchParams.get("q")).toBe("Imagine");
