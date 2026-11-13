@@ -22,41 +22,11 @@ const {
     createPerformanceMetrics,
 } = require("../utils/performanceMetrics");
 
+const {
+    mapSongRowToSong,
+} = require("../utils/songMapper");
+
 const router = express.Router();
-
-
-// Converts a database song row into the format expected
-// by the recommendation algorithm.
-
-function mapSongRow(row) {
-    let genres = row.genres;
-
-    if (typeof genres === "string") {
-        try {
-            genres = JSON.parse(genres);
-        } catch {
-            genres = [];
-        }
-    }
-
-    if (!Array.isArray(genres)) {
-        genres = [];
-    }
-
-    return {
-        spotifyId: row.spotify_id,
-        title: row.title,
-        artistId: row.artist_id,
-        artistName: row.artist_name,
-        genres,
-        albumId: row.album_id,
-        albumName: row.album_name,
-        albumImageUrl: row.album_image_url,
-        durationMs: row.duration_ms,
-        explicit: Boolean(row.explicit),
-        spotifyUrl: row.spotify_url,
-    };
-}
 
 
 // GET /api/recommendations/:userId
@@ -101,8 +71,6 @@ router.get("/:userId", async (req, res) => {
             preferenceRows.length
         );
 
-        // A user with no preferences has no recommendations.
-
         if (preferenceRows.length === 0) {
             metrics.setCount("candidateSongRows", 0);
             metrics.setCount("preparedCandidates", 0);
@@ -121,6 +89,7 @@ router.get("/:userId", async (req, res) => {
 
         // ------------------------------------------------
         // 2. Convert preference database rows.
+        // Uses the shared song mapper.
         // ------------------------------------------------
 
         const preferredSongs = metrics.measureSync(
@@ -129,10 +98,8 @@ router.get("/:userId", async (req, res) => {
         );
 
         // ------------------------------------------------
-        // 3. Retrieve candidates directly from MySQL.
-        //
-        // Already-preferred songs are excluded by the
-        // database query using NOT EXISTS.
+        // 3. Retrieve candidate songs from MySQL.
+        // Already-preferred songs are excluded in SQL.
         // ------------------------------------------------
 
         metrics.incrementCount("databaseQueries");
@@ -148,16 +115,18 @@ router.get("/:userId", async (req, res) => {
         );
 
         // ------------------------------------------------
-        // 4. Normalize database candidate records.
+        // 4. Normalize candidate database records.
+        // Uses the same shared song mapper.
         // ------------------------------------------------
 
         const normalizedCandidates = metrics.measureSync(
             "candidateNormalization",
-            () => songRows.map(mapSongRow)
+            () => songRows
+                .map(mapSongRowToSong)
+                .filter(Boolean)
         );
 
-        // Build preferred Spotify ID list.
-        // Retained as a defensive check during preparation.
+        // Retain defensive exclusion in candidate preparation.
 
         const selectedSongIds = preferredSongs
             .map(song => song.spotifyId)
@@ -197,8 +166,6 @@ router.get("/:userId", async (req, res) => {
             recommendations.length
         );
 
-        // Record successful completion.
-
         metrics.finish({
             outcome: "success",
             statusCode: 200,
@@ -210,9 +177,6 @@ router.get("/:userId", async (req, res) => {
         });
 
     } catch (error) {
-        // Record failure without including sensitive data
-        // in the performance metrics.
-
         metrics.finish({
             outcome: "error",
             statusCode: 500,
