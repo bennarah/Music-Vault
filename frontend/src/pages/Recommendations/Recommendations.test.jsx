@@ -230,7 +230,7 @@ describe("Recommendations Page", () => {
 
     expect(
       screen.getAllByText("Not available")
-    ).toHaveLength(2);
+    ).toHaveLength(4); // Genre, Popularity, Album, Duration
 
     expect(
       screen.getByText("50% match")
