@@ -1,12 +1,17 @@
 
-const {
-    deduplicateTracks,
-} = require("../utils/deduplicateTracks");
-
 /**
  * Validate and prepare normalized MusicVault tracks
  * for the recommendation algorithm.
+ *
+ * Uses a single iteration to:
+ * - Reject invalid tracks.
+ * - Exclude already-selected songs.
+ * - Normalize candidate metadata.
+ * - Remove duplicate Spotify IDs.
+ *
+ * This avoids creating intermediate filtered and mapped arrays.
  */
+
 function prepareCandidates(tracks, selectedSongIds = []) {
     if (!Array.isArray(tracks)) {
         throw new Error(
@@ -21,26 +26,45 @@ function prepareCandidates(tracks, selectedSongIds = []) {
     }
 
     const selectedIds = new Set(selectedSongIds);
+    const seenIds = new Set();
 
-    const validTracks = tracks
-        .filter((track) => {
-            return (
-                track &&
-                typeof track.spotifyId === "string" &&
-                track.spotifyId.trim() !== "" &&
-                typeof track.title === "string" &&
-                track.title.trim() !== "" &&
-                typeof track.artistName === "string" &&
-                track.artistName.trim() !== "" &&
-                !selectedIds.has(track.spotifyId)
-            );
-        })
-        .map((track) => ({
+    const preparedCandidates = [];
+
+    for (const track of tracks) {
+        // Reject invalid records and missing Spotify IDs.
+        if (
+            !track ||
+            typeof track.spotifyId !== "string" ||
+            !track.spotifyId.trim() ||
+            typeof track.title !== "string" ||
+            !track.title.trim() ||
+            typeof track.artistName !== "string" ||
+            !track.artistName.trim()
+        ) {
+            continue;
+        }
+
+        const spotifyId = track.spotifyId;
+
+        // Exclude songs already selected by the user.
+        if (selectedIds.has(spotifyId)) {
+            continue;
+        }
+
+        // Remove duplicate Spotify IDs.
+        if (seenIds.has(spotifyId)) {
+            continue;
+        }
+
+        seenIds.add(spotifyId);
+
+        // Normalize metadata while creating one new object.
+        const preparedTrack = {
             ...track,
 
             genres: Array.isArray(track.genres)
                 ? track.genres.filter(
-                    (genre) =>
+                    genre =>
                         typeof genre === "string" &&
                         genre.trim() !== ""
                 )
@@ -57,9 +81,12 @@ function prepareCandidates(tracks, selectedSongIds = []) {
                 typeof track.artistId === "string"
                     ? track.artistId
                     : null,
-        }));
+        };
 
-    return deduplicateTracks(validTracks);
+        preparedCandidates.push(preparedTrack);
+    }
+
+    return preparedCandidates;
 }
 
 module.exports = {
