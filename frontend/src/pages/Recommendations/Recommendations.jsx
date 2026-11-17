@@ -6,16 +6,13 @@ import "./Recommendations.css";
 import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
 import { getRecommendations } from "../../services/recommendationService";
 import { mockRecommendations } from "../../mocks/recommendations";
+import { DEV_USER_ID } from "../../config/devUser";
 
 // Use mock recommendations until live integration is ready.
 const useMockRecommendations =
   import.meta.env.VITE_USE_MOCK_RECOMMENDATIONS === "true";
 
-// Temporary development-only user ID.
-// Replace with real user context when authentication is implemented.
-const devUserId = import.meta.env.DEV
-  ? import.meta.env.VITE_DEV_USER_ID
-  : undefined;
+
 
 function getRecommendationErrorMessage(error) {
   const message = error?.message || "";
@@ -58,11 +55,11 @@ function Recommendations() {
           await new Promise((resolve) => setTimeout(resolve, 800));
           results = mockRecommendations;
         } else {
-          if (!devUserId) {
+          if (!DEV_USER_ID) {
             throw new Error("No development user ID is configured.");
           }
 
-          results = await getRecommendations(devUserId);
+          results = await getRecommendations(DEV_USER_ID);
         }
 
         if (currentRequest === requestId.current) {

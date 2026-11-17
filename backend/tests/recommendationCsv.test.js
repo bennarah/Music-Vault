@@ -47,3 +47,101 @@ describe("SCRUM-108 Recommendation CSV Generation", () => {
     );
   });
 });
+
+describe("SCRUM-111 CSV Special Characters and Missing Metadata", () => {
+  test("S5-DATA-02: escapes commas, quotes, and newlines", () => {
+    const recommendations = [
+      {
+        song: {
+          spotifyId: "track-special",
+          title: 'Hello, "World"',
+          artistName: "Artist\nFeaturing Guest",
+          genres: ["pop", "indie"],
+          albumName: 'The "Best" Album',
+          durationMs: 200000,
+          spotifyUrl: "https://example.com/song",
+        },
+        score: 90,
+      },
+    ];
+
+    const csv = generateRecommendationCsv(recommendations);
+
+    const expectedRow = [
+      '"Hello, ""World"""',
+      '"Artist\nFeaturing Guest"',
+      "pop; indie",
+      '"The ""Best"" Album"',
+      "200000",
+      "90",
+      "track-special",
+      "https://example.com/song",
+    ].join(",");
+
+    expect(csv).toBe(
+      CSV_HEADERS.join(",") + "\r\n" +
+      expectedRow + "\r\n"
+    );
+  });
+
+  test("S5-DATA-04: handles missing optional metadata", () => {
+    const recommendations = [
+      {
+        song: {
+          spotifyId: "track-missing",
+          title: "Unknown Journey",
+          artistName: "Example Artist",
+          genres: [],
+          albumName: null,
+          durationMs: null,
+          spotifyUrl: null,
+        },
+        score: null,
+      },
+    ];
+
+    const csv = generateRecommendationCsv(recommendations);
+    const lines = csv.trimEnd().split("\r\n");
+
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toBe(CSV_HEADERS.join(","));
+    expect(lines[1]).toBe(
+      "Unknown Journey,Example Artist,,,,,track-missing,"
+    );
+  });
+
+  test("handles invalid similarity scores", () => {
+    const recommendations = [
+      {
+        song: {
+          title: "Invalid Score Song",
+          artistName: "Test Artist",
+          genres: ["rock"],
+        },
+        score: 150,
+      },
+    ];
+
+    const csv = generateRecommendationCsv(recommendations);
+
+    expect(csv).toContain(
+      "Invalid Score Song,Test Artist,rock,,,,,"
+    );
+    expect(csv).not.toContain(",150,");
+  });
+
+  test("handles missing song metadata object", () => {
+    const recommendations = [
+      {
+        score: 50,
+      },
+    ];
+
+    const csv = generateRecommendationCsv(recommendations);
+    const lines = csv.trimEnd().split("\r\n");
+
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toBe(CSV_HEADERS.join(","));
+    expect(lines[1]).toBe(",,,,,50,,");
+  });
+});
