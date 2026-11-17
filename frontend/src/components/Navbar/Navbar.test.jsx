@@ -2,13 +2,16 @@ import { describe, expect, test } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Navbar from "./Navbar";
+import { ThemeProvider } from "../../context/ThemeContext";
 
 describe("Phase 1 - Navbar Route Regression", () => {
   test("all navigation links use the correct paths", () => {
     render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter>
+          <Navbar />
+        </MemoryRouter>
+      </ThemeProvider>
     );
 
     const expectedLinks = [
@@ -29,9 +32,11 @@ describe("Phase 1 - Navbar Route Regression", () => {
 
   test("navigation links contain no leading or trailing spaces", () => {
     render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter>
+          <Navbar />
+        </MemoryRouter>
+      </ThemeProvider>
     );
 
     const links = screen.getAllByRole("link");
