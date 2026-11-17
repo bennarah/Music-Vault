@@ -56,23 +56,42 @@ router.get("/:userId", async (req, res) => {
 
     try {
         // ------------------------------------------------
-        // 1. Retrieve saved user preferences.
+        // 1. Retrieve preferences and candidates concurrently.
+        //
+        // Both queries depend only on userId and can run
+        // independently using the MySQL connection pool.
         // ------------------------------------------------
 
-        metrics.incrementCount("databaseQueries");
+        metrics.incrementCount("databaseQueries", 2);
 
-        const preferenceRows = await metrics.measure(
-            "preferenceQuery",
-            () => getPreferencesByUser(userId)
-        );
+        const [
+            preferenceRows,
+            songRows,
+        ] = await Promise.all([
+            metrics.measure(
+                "preferenceQuery",
+                () => getPreferencesByUser(userId)
+            ),
+
+            metrics.measure(
+                "candidateQuery",
+                () => getCandidateSongsForUser(userId)
+            ),
+        ]);
 
         metrics.setCount(
             "preferredSongRows",
             preferenceRows.length
         );
 
+        metrics.setCount(
+            "candidateSongRows",
+            songRows.length
+        );
+
+        // A user with no preferences has no recommendations.
+
         if (preferenceRows.length === 0) {
-            metrics.setCount("candidateSongRows", 0);
             metrics.setCount("preparedCandidates", 0);
             metrics.setCount("recommendationsGenerated", 0);
 
@@ -94,28 +113,13 @@ router.get("/:userId", async (req, res) => {
 
         const preferredSongs = metrics.measureSync(
             "preferenceMapping",
-            () => preferenceRows.map(mapPreferenceRowToSong)
+            () => preferenceRows
+                .map(mapPreferenceRowToSong)
+                .filter(Boolean)
         );
 
         // ------------------------------------------------
-        // 3. Retrieve candidate songs from MySQL.
-        // Already-preferred songs are excluded in SQL.
-        // ------------------------------------------------
-
-        metrics.incrementCount("databaseQueries");
-
-        const songRows = await metrics.measure(
-            "candidateQuery",
-            () => getCandidateSongsForUser(userId)
-        );
-
-        metrics.setCount(
-            "candidateSongRows",
-            songRows.length
-        );
-
-        // ------------------------------------------------
-        // 4. Normalize candidate database records.
+        // 3. Normalize candidate database records.
         // Uses the same shared song mapper.
         // ------------------------------------------------
 
@@ -133,7 +137,7 @@ router.get("/:userId", async (req, res) => {
             .filter(Boolean);
 
         // ------------------------------------------------
-        // 5. Validate and prepare candidates.
+        // 4. Validate and prepare candidates.
         // ------------------------------------------------
 
         const candidateSongs = metrics.measureSync(
@@ -150,7 +154,7 @@ router.get("/:userId", async (req, res) => {
         );
 
         // ------------------------------------------------
-        // 6. Generate ranked recommendations.
+        // 5. Generate ranked recommendations.
         // ------------------------------------------------
 
         const recommendations = metrics.measureSync(
@@ -166,6 +170,8 @@ router.get("/:userId", async (req, res) => {
             recommendations.length
         );
 
+        // Record successful completion.
+
         metrics.finish({
             outcome: "success",
             statusCode: 200,
@@ -177,6 +183,8 @@ router.get("/:userId", async (req, res) => {
         });
 
     } catch (error) {
+        // Record failure without exposing sensitive information.
+
         metrics.finish({
             outcome: "error",
             statusCode: 500,
