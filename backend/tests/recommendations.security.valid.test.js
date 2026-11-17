@@ -1,45 +1,50 @@
+
 const request = require("supertest");
 
 jest.mock("../src/models/preferenceModel", () => ({
-  getPreferencesByUser: jest.fn(),
-  mapPreferenceRowToSong: jest.fn(),
+    getPreferencesByUser: jest.fn(),
+    mapPreferenceRowToSong: jest.fn(),
 }));
 
 jest.mock("../src/models/songModel", () => ({
-  getAllSongs: jest.fn(),
+    getCandidateSongsForUser: jest.fn(),
 }));
 
 const {
-  getPreferencesByUser,
+    getPreferencesByUser,
 } = require("../src/models/preferenceModel");
 
 const {
-  getAllSongs,
+    getCandidateSongsForUser,
 } = require("../src/models/songModel");
 
 const app = require("../src/app");
 
 describe("R1 SOC 2 - Valid UUID Processing", () => {
-  const userId = "123e4567-e89b-42d3-a456-426614174000";
+    const userId = "123e4567-e89b-42d3-a456-426614174000";
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    getPreferencesByUser.mockResolvedValue([]);
-  });
+    beforeEach(() => {
+        jest.clearAllMocks();
 
-  test("accepts a valid UUID and processes an empty preference list", async () => {
-    const response = await request(app)
-      .get(`/api/recommendations/${userId}`)
-      .expect(200);
-
-    expect(getPreferencesByUser).toHaveBeenCalledWith(userId);
-    expect(getPreferencesByUser).toHaveBeenCalledTimes(1);
-
-    expect(response.body).toEqual({
-      success: true,
-      recommendations: [],
+        getPreferencesByUser.mockResolvedValue([]);
+        getCandidateSongsForUser.mockResolvedValue([]);
     });
 
-    expect(getAllSongs).not.toHaveBeenCalled();
-  });
+    test("accepts a valid UUID and processes an empty preference list", async () => {
+        const response = await request(app)
+            .get(`/api/recommendations/${userId}`)
+            .expect(200);
+
+        expect(getPreferencesByUser).toHaveBeenCalledWith(userId);
+        expect(getPreferencesByUser).toHaveBeenCalledTimes(1);
+
+        // Candidate retrieval now runs concurrently.
+        expect(getCandidateSongsForUser).toHaveBeenCalledWith(userId);
+        expect(getCandidateSongsForUser).toHaveBeenCalledTimes(1);
+
+        expect(response.body).toEqual({
+            success: true,
+            recommendations: [],
+        });
+    });
 });
