@@ -14,6 +14,14 @@ export function register(userData) {
   });
 }
 
+export function getSpotifyOAuthUrl(apiBaseUrl = import.meta.env.VITE_API_BASE_URL) {
+  if (typeof apiBaseUrl !== "string" || !apiBaseUrl.trim()) {
+    throw new Error("Music Vault API base URL is not configured.");
+  }
+
+  return `${apiBaseUrl.trim().replace(/\/+$/, "")}/auth/spotify`;
+}
+
 export function startSpotifyOAuth() {
-  window.location.href = `${import.meta.env.VITE_API_URL}/auth/spotify`;
+  window.location.href = getSpotifyOAuthUrl();
 }

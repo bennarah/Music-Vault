@@ -17,9 +17,9 @@ const API_BASE_URL = (
     "http://127.0.0.1:5001"
 ).replace(/\/+$/, "");
 
-// Temporary development user.
-// Replace with authenticated user information later.
-const DEV_USER_ID = "musicvault-demo-user";
+// Shared development user ID.
+// Replace with authenticated user context later.
+import { DEV_USER_ID } from "../config/devUser";
 
 function SongSelectionPage() {
     const [query, setQuery] = useState("");
@@ -46,6 +46,14 @@ function SongSelectionPage() {
         let active = true;
 
         async function loadPreferences() {
+            if (!DEV_USER_ID) {
+                if (active) {
+                    setError("Please sign in to manage your song preferences.");
+                    setLoadingPreferences(false);
+                }
+                return;
+            }
+
             try {
                 const preferences = await getPreferences(
                     DEV_USER_ID
@@ -66,7 +74,7 @@ function SongSelectionPage() {
                 );
 
                 setSelectedTracks(savedTracks);
-            } catch (err) {
+            } catch {
                 if (active) {
                     setError(
                         "Unable to load saved preferences. " +
@@ -175,6 +183,11 @@ function SongSelectionPage() {
 
     async function handleSelectTrack(track) {
         if (savingRef.current || loadingPreferences) return;
+
+        if (!DEV_USER_ID) {
+            setError("Please sign in to save song preferences.");
+            return;
+        }
 
         if (!track?.spotifyId) {
             setError("This song has no valid Spotify ID.");
@@ -314,7 +327,7 @@ function SongSelectionPage() {
     // --------------------------------------------------------
 
     return (
-        <main className="song-selection-page">
+        <div className="song-selection-page">
             <h1>Select Songs You Like</h1>
 
             <section>
@@ -417,7 +430,7 @@ function SongSelectionPage() {
             {message && (
                 <p role="status">{message}</p>
             )}
-        </main>
+        </div>
     );
 }
 
