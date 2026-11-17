@@ -48,6 +48,16 @@ export function normalizeRecommendation(result) {
       ? result.score
       : null;
 
+  // Outdated normalization logic (commented out). Bring back if new implemementation breaks something.
+  // return {
+  //   id: safeText(song.spotifyId, null),
+  //   title: safeText(song.title, "Unknown title"),
+  //   artist: safeText(song.artistName, "Unknown artist"),
+  //   genre: genre ? genre.trim() : null,
+  //   popularity,
+  //   score,
+  // };
+
   return {
     id: safeText(song.spotifyId, null),
     title: safeText(song.title, "Unknown title"),
@@ -55,6 +65,19 @@ export function normalizeRecommendation(result) {
     genre: genre ? genre.trim() : null,
     popularity,
     score,
+
+    // Additional metadata for recommendation cards
+    albumName: safeText(song.albumName, null),
+    albumImageUrl: safeText(song.albumImageUrl, null),
+
+    durationMs:
+      typeof song.durationMs === "number" &&
+      Number.isFinite(song.durationMs) &&
+      song.durationMs >= 0
+        ? song.durationMs
+        : null,
+
+    spotifyUrl: safeText(song.spotifyUrl, null),
   };
 }
 

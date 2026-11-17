@@ -1,6 +1,22 @@
 
 import "./RecommendationCard.css";
 
+function formatDuration(durationMs) {
+  if (
+    typeof durationMs !== "number" ||
+    !Number.isFinite(durationMs) ||
+    durationMs < 0
+  ) {
+    return "Not available";
+  }
+
+  const totalSeconds = Math.floor(durationMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
 function RecommendationCard({ recommendation }) {
   const title =
     typeof recommendation?.title === "string" &&
@@ -58,6 +74,16 @@ function RecommendationCard({ recommendation }) {
         <div>
           <dt>Popularity</dt>
           <dd>{popularity}</dd>
+        </div>
+
+        <div>
+          <dt>Album</dt>
+          <dd>{recommendation?.albumName || "Not available"}</dd>
+        </div>
+
+        <div>
+          <dt>Duration</dt>
+          <dd>{formatDuration(recommendation?.durationMs)}</dd>
         </div>
       </dl>
     </article>
