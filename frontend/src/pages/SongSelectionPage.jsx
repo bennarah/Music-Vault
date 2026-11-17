@@ -327,7 +327,7 @@ function SongSelectionPage() {
     // --------------------------------------------------------
 
     return (
-        <main className="song-selection-page">
+        <div className="song-selection-page">
             <h1>Select Songs You Like</h1>
 
             <section>
@@ -430,7 +430,7 @@ function SongSelectionPage() {
             {message && (
                 <p role="status">{message}</p>
             )}
-        </main>
+        </div>
     );
 }
 
