@@ -6,7 +6,11 @@ import Layout from "./components/Layout/Layout";
 import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
-import Dashboard from "./pages/Dashboard/Dashboard";
+import { lazy, Suspense } from "react";
+
+const Dashboard = lazy(() =>
+  import("./pages/Dashboard/Dashboard")
+);
 import Recommendations from "./pages/Recommendations/Recommendations";
 
 // Song selection page
@@ -26,7 +30,14 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <Suspense fallback={<p role="status">Loading dashboard...</p>}>
+              <Dashboard />
+            </Suspense>
+          }
+        />
         <Route
           path="/recommendations"
           element={<Recommendations />}
