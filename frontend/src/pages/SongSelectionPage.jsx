@@ -9,6 +9,7 @@ import {
 
 import SongCard from "../components/SongCard";
 import ManualSongInput from "../components/ManualSongInput";
+import "./SongSelectionPage.css";
 
 // Backend API address.
 // Can be overridden through frontend/.env.
@@ -330,7 +331,9 @@ function SongSelectionPage() {
         <div className="song-selection-page">
             <h1>Select Songs You Like</h1>
 
-            <section>
+            <div className="song-selection-layout">
+              <div className="song-selection-primary">
+            <section className="song-search-section">
                 <h2>Search Spotify</h2>
 
                 <form onSubmit={handleSearch}>
@@ -357,7 +360,7 @@ function SongSelectionPage() {
                 </form>
             </section>
 
-            <section>
+            <section className="song-results-section">
                 <h2>Search Results</h2>
 
                 {loading && (
@@ -378,24 +381,28 @@ function SongSelectionPage() {
                         <p>Search for a song to get started.</p>
                     )}
 
-                {tracks.map((track) => (
-                    <SongCard
-                        key={track.spotifyId}
-                        track={track}
-                        onSelect={handleSelectTrack}
-                        saving={saving || loadingPreferences}
-                    />
-                ))}
+                <div className="song-results-grid">
+                    {tracks.map((track) => (
+                        <SongCard
+                            key={track.spotifyId}
+                            track={track}
+                            onSelect={handleSelectTrack}
+                            saving={saving || loadingPreferences}
+                        />
+                    ))}
+                </div>
             </section>
 
-            <section>
+            <section className="song-manual-section">
                 <ManualSongInput
                     onSubmit={handleManualSong}
                     saving={loading}
                 />
             </section>
 
-            <section>
+              </div>
+              <aside className="song-selection-sidebar">
+            <section className="song-selected-section">
                 <h2>Selected Songs</h2>
 
                 {loadingPreferences ? (
@@ -422,6 +429,9 @@ function SongSelectionPage() {
                     </ul>
                 )}
             </section>
+
+              </aside>
+            </div>
 
             {error && (
                 <p role="alert">{error}</p>

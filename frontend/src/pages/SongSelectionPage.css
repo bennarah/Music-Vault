@@ -1,0 +1,180 @@
+.song-selection-page {
+  width: 100%;
+}
+
+.song-selection-page > h1 {
+  margin: 0 0 var(--space-8);
+}
+
+.song-selection-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.song-selection-primary,
+.song-selection-sidebar {
+  min-width: 0;
+}
+
+.song-selection-primary {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.song-selection-primary > section,
+.song-selected-section {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.song-selection-page section h2 {
+  margin-top: 0;
+}
+
+.song-search-section form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.song-search-section label {
+  flex-basis: 100%;
+  font-weight: 600;
+}
+
+.song-search-section input {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.song-results-section .song-card {
+  margin-top: var(--space-4);
+}
+
+.song-manual-section form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.song-manual-section button {
+  justify-self: start;
+}
+
+.song-selected-section ul {
+  padding-left: var(--space-5);
+}
+
+.song-selected-section li {
+  margin-bottom: var(--space-4);
+  overflow-wrap: anywhere;
+}
+
+.song-selected-section li button {
+  display: block;
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 800px) {
+  .song-selection-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .song-selection-primary > section,
+  .song-selected-section {
+    padding: var(--space-4);
+  }
+
+  .song-search-section form {
+    align-items: stretch;
+  }
+
+  .song-search-section input,
+  .song-search-section button {
+    width: 100%;
+  }
+}
+
+/* Responsive Spotify search results */
+
+.song-results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.song-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
+.song-card-artwork {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--color-surface-hover);
+}
+
+.song-card-artwork img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.song-card-artwork-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--color-text-muted);
+  font-size: 3rem;
+}
+
+.song-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.song-card-content h3 {
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.song-card-content p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.song-card-artist {
+  color: var(--color-text);
+}
+
+.song-card-album {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.song-card-content button {
+  width: 100%;
+  margin-top: auto;
+}
+
+@media (max-width: 600px) {
+  .song-results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
