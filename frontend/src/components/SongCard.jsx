@@ -1,4 +1,4 @@
-function SongCard({ track, onSelect, saving = false }) {
+function SongCard({ track, onSelect, saving = false, selected = false }) {
   return (
     <article className="song-card">
       <div className="song-card-artwork">
@@ -26,9 +26,10 @@ function SongCard({ track, onSelect, saving = false }) {
         <button
           type="button"
           onClick={() => onSelect(track)}
-          disabled={saving}
+          disabled={saving || selected}
+          className={selected ? "song-card-added" : ""}
         >
-          {saving ? "Saving..." : "Select Song"}
+          {selected ? "✓ Added" : saving ? "Saving..." : "Select Song"}
         </button>
       </div>
     </article>

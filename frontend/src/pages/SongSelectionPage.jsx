@@ -1,5 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 import {
     savePreference,
@@ -358,6 +359,19 @@ function SongSelectionPage() {
                         {loading ? "Searching..." : "Search"}
                     </button>
                 </form>
+                <div className="song-feedback">
+                    {error && (
+                        <p className="song-feedback-error" role="alert">
+                            {error}
+                        </p>
+                    )}
+
+                    {message && (
+                        <p className="song-feedback-success" role="status">
+                            {message}
+                        </p>
+                    )}
+                </div>
             </section>
 
             <section className="song-results-section">
@@ -388,58 +402,84 @@ function SongSelectionPage() {
                             track={track}
                             onSelect={handleSelectTrack}
                             saving={saving || loadingPreferences}
+                            selected={selectedTracks.some(
+                                (song) => song.spotifyId === track.spotifyId
+                            )}
                         />
                     ))}
                 </div>
             </section>
 
             <section className="song-manual-section">
-                <ManualSongInput
-                    onSubmit={handleManualSong}
-                    saving={loading}
-                />
+                <details className="song-manual-details">
+                    <summary>
+                        Can't find it? Enter a song manually
+                    </summary>
+
+                    <div className="song-manual-content">
+                        <ManualSongInput
+                            onSubmit={handleManualSong}
+                            saving={loading}
+                        />
+                    </div>
+                </details>
             </section>
 
               </div>
               <aside className="song-selection-sidebar">
             <section className="song-selected-section">
-                <h2>Selected Songs</h2>
+                <h2>
+                    Your Picks
+                    <span className="selected-song-count">
+                        {selectedTracks.length}
+                    </span>
+                </h2>
 
                 {loadingPreferences ? (
                     <p>Loading saved songs...</p>
                 ) : selectedTracks.length === 0 ? (
                     <p>No songs selected yet.</p>
                 ) : (
-                    <ul>
+                    <ul className="selected-song-list">
                         {selectedTracks.map((track) => (
-                            <li key={track.preferenceId}>
-                                {track.title} — {track.artistName}
+                            <li
+                                key={track.preferenceId}
+                                className="selected-song-chip"
+                            >
+                                <div className="selected-song-info">
+                                    <strong>{track.title}</strong>
+                                    <span>{track.artistName}</span>
+                                </div>
 
                                 <button
                                     type="button"
+                                    className="selected-song-remove"
+                                    aria-label={`Remove ${track.title} by ${track.artistName}`}
+                                    title={`Remove ${track.title}`}
                                     disabled={saving}
                                     onClick={() =>
                                         handleRemoveTrack(track)
                                     }
                                 >
-                                    Remove
+                                    <span aria-hidden="true">×</span>
                                 </button>
                             </li>
                         ))}
                     </ul>
                 )}
+
+                <Link
+                    to="/recommendations"
+                    className="song-recommendations-link"
+                >
+                    Get Recommendations
+                </Link>
             </section>
 
               </aside>
             </div>
 
-            {error && (
-                <p role="alert">{error}</p>
-            )}
 
-            {message && (
-                <p role="status">{message}</p>
-            )}
         </div>
     );
 }

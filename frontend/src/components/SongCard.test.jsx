@@ -56,6 +56,52 @@ describe("Phase 3 - SongCard UI", () => {
     expect(onSelect).toHaveBeenCalledExactlyOnceWith(mockTrack);
   });
 
+  test("shows Added and disables an already-selected song", () => {
+    const onSelect = vi.fn();
+
+    render(
+      <SongCard
+        track={mockTrack}
+        onSelect={onSelect}
+        selected
+      />
+    );
+
+    const button = screen.getByRole("button", {
+      name: /Added/,
+    });
+
+    expect(button.disabled).toBe(true);
+
+    fireEvent.click(button);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  test("becomes selectable again when selected is false", () => {
+    const onSelect = vi.fn();
+
+    const { rerender } = render(
+      <SongCard track={mockTrack} onSelect={onSelect} selected />
+    );
+
+    rerender(
+      <SongCard
+        track={mockTrack}
+        onSelect={onSelect}
+        selected={false}
+      />
+    );
+
+    const button = screen.getByRole("button", {
+      name: "Select Song",
+    });
+
+    expect(button.disabled).toBe(false);
+
+    fireEvent.click(button);
+    expect(onSelect).toHaveBeenCalledWith(mockTrack);
+  });
+
   test("disables selection while saving", () => {
     render(
       <SongCard track={mockTrack} onSelect={vi.fn()} saving />
