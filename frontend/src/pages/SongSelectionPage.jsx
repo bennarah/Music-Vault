@@ -9,6 +9,7 @@ import {
 } from "../services/preferenceApi";
 
 import SongCard from "../components/SongCard";
+import SongCardSkeleton from "../components/SongCardSkeleton";
 import ManualSongInput from "../components/ManualSongInput";
 import "./SongSelectionPage.css";
 
@@ -378,9 +379,20 @@ function SongSelectionPage() {
                 <h2>Search Results</h2>
 
                 {loading && (
-                    <p role="status">
-                        Searching for songs...
-                    </p>
+                    <>
+                        <p role="status" className="visually-hidden">
+                            Searching for songs...
+                        </p>
+
+                        <div
+                            className="song-results-grid"
+                            aria-hidden="true"
+                        >
+                            {Array.from({ length: 3 }, (_, index) => (
+                                <SongCardSkeleton key={index} />
+                            ))}
+                        </div>
+                    </>
                 )}
 
                 {!loading &&
