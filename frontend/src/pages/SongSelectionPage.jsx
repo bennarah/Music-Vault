@@ -1,5 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 import {
     savePreference,
@@ -8,7 +9,9 @@ import {
 } from "../services/preferenceApi";
 
 import SongCard from "../components/SongCard";
+import SongCardSkeleton from "../components/SongCardSkeleton";
 import ManualSongInput from "../components/ManualSongInput";
+import "./SongSelectionPage.css";
 
 // Backend API address.
 // Can be overridden through frontend/.env.
@@ -330,7 +333,9 @@ function SongSelectionPage() {
         <div className="song-selection-page">
             <h1>Select Songs You Like</h1>
 
-            <section>
+            <div className="song-selection-layout">
+              <div className="song-selection-primary">
+            <section className="song-search-section">
                 <h2>Search Spotify</h2>
 
                 <form onSubmit={handleSearch}>
@@ -355,15 +360,39 @@ function SongSelectionPage() {
                         {loading ? "Searching..." : "Search"}
                     </button>
                 </form>
+                <div className="song-feedback">
+                    {error && (
+                        <p className="song-feedback-error" role="alert">
+                            {error}
+                        </p>
+                    )}
+
+                    {message && (
+                        <p className="song-feedback-success" role="status">
+                            {message}
+                        </p>
+                    )}
+                </div>
             </section>
 
-            <section>
+            <section className="song-results-section">
                 <h2>Search Results</h2>
 
                 {loading && (
-                    <p role="status">
-                        Searching for songs...
-                    </p>
+                    <>
+                        <p role="status" className="visually-hidden">
+                            Searching for songs...
+                        </p>
+
+                        <div
+                            className="song-results-grid"
+                            aria-hidden="true"
+                        >
+                            {Array.from({ length: 3 }, (_, index) => (
+                                <SongCardSkeleton key={index} />
+                            ))}
+                        </div>
+                    </>
                 )}
 
                 {!loading &&
@@ -378,58 +407,91 @@ function SongSelectionPage() {
                         <p>Search for a song to get started.</p>
                     )}
 
-                {tracks.map((track) => (
-                    <SongCard
-                        key={track.spotifyId}
-                        track={track}
-                        onSelect={handleSelectTrack}
-                        saving={saving || loadingPreferences}
-                    />
-                ))}
+                <div className="song-results-grid">
+                    {tracks.map((track) => (
+                        <SongCard
+                            key={track.spotifyId}
+                            track={track}
+                            onSelect={handleSelectTrack}
+                            saving={saving || loadingPreferences}
+                            selected={selectedTracks.some(
+                                (song) => song.spotifyId === track.spotifyId
+                            )}
+                        />
+                    ))}
+                </div>
             </section>
 
-            <section>
-                <ManualSongInput
-                    onSubmit={handleManualSong}
-                    saving={loading}
-                />
+            <section className="song-manual-section">
+                <details className="song-manual-details">
+                    <summary>
+                        Can't find it? Enter a song manually
+                    </summary>
+
+                    <div className="song-manual-content">
+                        <ManualSongInput
+                            onSubmit={handleManualSong}
+                            saving={loading}
+                        />
+                    </div>
+                </details>
             </section>
 
-            <section>
-                <h2>Selected Songs</h2>
+              </div>
+              <aside className="song-selection-sidebar">
+            <section className="song-selected-section">
+                <h2>
+                    Your Picks
+                    <span className="selected-song-count">
+                        {selectedTracks.length}
+                    </span>
+                </h2>
 
                 {loadingPreferences ? (
                     <p>Loading saved songs...</p>
                 ) : selectedTracks.length === 0 ? (
                     <p>No songs selected yet.</p>
                 ) : (
-                    <ul>
+                    <ul className="selected-song-list">
                         {selectedTracks.map((track) => (
-                            <li key={track.preferenceId}>
-                                {track.title} — {track.artistName}
+                            <li
+                                key={track.preferenceId}
+                                className="selected-song-chip"
+                            >
+                                <div className="selected-song-info">
+                                    <strong>{track.title}</strong>
+                                    <span>{track.artistName}</span>
+                                </div>
 
                                 <button
                                     type="button"
+                                    className="selected-song-remove"
+                                    aria-label={`Remove ${track.title} by ${track.artistName}`}
+                                    title={`Remove ${track.title}`}
                                     disabled={saving}
                                     onClick={() =>
                                         handleRemoveTrack(track)
                                     }
                                 >
-                                    Remove
+                                    <span aria-hidden="true">×</span>
                                 </button>
                             </li>
                         ))}
                     </ul>
                 )}
+
+                <Link
+                    to="/recommendations"
+                    className="song-recommendations-link"
+                >
+                    Get Recommendations
+                </Link>
             </section>
 
-            {error && (
-                <p role="alert">{error}</p>
-            )}
+              </aside>
+            </div>
 
-            {message && (
-                <p role="status">{message}</p>
-            )}
+
         </div>
     );
 }
