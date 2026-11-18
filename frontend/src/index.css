@@ -170,7 +170,7 @@ img {
 
 /* Shared application content layout */
 
-main {
+.app-main {
   width: 100%;
   max-width: var(--content-max-width);
   margin-inline: auto;
@@ -178,7 +178,7 @@ main {
 }
 
 @media (max-width: 600px) {
-  main {
+  .app-main {
     padding: var(--space-5) var(--space-4);
   }
 }
