@@ -16,11 +16,11 @@ describe("Phase 1 - Navbar Route Regression", () => {
 
     const expectedLinks = [
       ["MusicVault", "/"],
-      ["Login", "/login"],
-      ["Register", "/register"],
+      ["Home", "/"],
       ["Dashboard", "/dashboard"],
-      ["Recommendations", "/recommendations"],
       ["Select Songs", "/songs"],
+      ["Recommendations", "/recommendations"],
+      ["Log In", "/login"],
     ];
 
     for (const [name, path] of expectedLinks) {

@@ -200,3 +200,36 @@
     padding: var(--space-3);
   }
 }
+
+/* Phase 5 - Account navigation */
+
+.navbar-login-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navbar-login-button:hover {
+  background: var(--color-accent-hover);
+  color: var(--color-accent-text);
+}
+
+.navbar-login-button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 599px) {
+  .navbar-login-button {
+    padding-inline: var(--space-3);
+  }
+}
