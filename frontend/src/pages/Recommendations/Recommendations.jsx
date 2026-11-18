@@ -1,9 +1,10 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Recommendations.css";
 
 import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
+import RecommendationCardSkeleton from "../../components/RecommendationCard/RecommendationCardSkeleton";
 import { getRecommendations } from "../../services/recommendationService";
 import { mockRecommendations } from "../../mocks/recommendations";
 import { DEV_USER_ID } from "../../config/devUser";
@@ -36,6 +37,8 @@ function Recommendations() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryCount, setRetryCount] = useState(0);
+  const [sortOrder, setSortOrder] = useState("score-desc");
+  const [genreFilter, setGenreFilter] = useState("all");
 
   // Prevent updates from requests belonging to an older effect.
   const requestId = useRef(0);
@@ -85,6 +88,66 @@ function Recommendations() {
     };
   }, [retryCount]);
 
+  const normalizeGenre = (genre) =>
+    typeof genre === "string"
+      ? genre.trim().toLowerCase()
+      : "";
+
+  const availableGenres = useMemo(() => {
+    const genres = recommendations
+      .map((item) => normalizeGenre(item?.genre))
+      .filter(Boolean);
+
+    return [...new Set(genres)].sort((a, b) =>
+      a.localeCompare(b)
+    );
+  }, [recommendations]);
+
+  const filteredRecommendations = useMemo(() => {
+    if (genreFilter === "all") return recommendations;
+
+    if (genreFilter === "unknown") {
+      return recommendations.filter(
+        (item) => !normalizeGenre(item?.genre)
+      );
+    }
+
+    return recommendations.filter(
+      (item) => normalizeGenre(item?.genre) === genreFilter
+    );
+  }, [recommendations, genreFilter]);
+
+  const sortedRecommendations = useMemo(() => {
+    const validValue = (recommendation, field) => {
+      const value = recommendation?.[field];
+
+      return typeof value === "number" &&
+        Number.isFinite(value) &&
+        value >= 0 &&
+        value <= 100
+        ? value
+        : null;
+    };
+
+    const sortByPopularity = sortOrder.startsWith("popularity-");
+    const field = sortByPopularity ? "popularity" : "score";
+    const ascending = sortOrder.endsWith("-asc");
+
+    return [...filteredRecommendations].sort((a, b) => {
+      const valueA = validValue(a, field);
+      const valueB = validValue(b, field);
+
+      // Missing or invalid values always appear last.
+      if (valueA === null && valueB === null) return 0;
+      if (valueA === null) return 1;
+      if (valueB === null) return -1;
+
+      return ascending
+        ? valueA - valueB
+        : valueB - valueA;
+    });
+  }, [filteredRecommendations, sortOrder]);
+
   function handleRetry() {
     if (!loading) {
       setRetryCount((count) => count + 1);
@@ -105,13 +168,17 @@ function Recommendations() {
       </div>
 
       {loading && (
-        <div className="recommendations-state" role="status">
-          <div
-            className="recommendations-spinner"
-            aria-hidden="true"
-          />
-          <h2>Loading recommendations...</h2>
-          <p>Please wait while Music Vault prepares your results.</p>
+        <div className="recommendations-loading">
+          <div className="recommendations-loading-message" role="status">
+            <h2>Loading recommendations...</h2>
+            <p>Please wait while Music Vault prepares your results.</p>
+          </div>
+
+          <div className="recommendations-grid" aria-hidden="true">
+            {Array.from({ length: 3 }, (_, index) => (
+              <RecommendationCardSkeleton key={index} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -148,14 +215,68 @@ function Recommendations() {
       )}
 
       {!loading && !error && recommendations.length > 0 && (
-        <div className="recommendations-grid">
-          {recommendations.map((recommendation, index) => (
-            <RecommendationCard
-              key={recommendation.id ?? index}
-              recommendation={recommendation}
-            />
-          ))}
-        </div>
+        <>
+          <div className="recommendations-toolbar">
+            <label htmlFor="recommendations-genre">
+              Filter by genre
+            </label>
+
+            <select
+              id="recommendations-genre"
+              value={genreFilter}
+              onChange={(event) => setGenreFilter(event.target.value)}
+            >
+              <option value="all">All Genres</option>
+              {availableGenres.map((genre) => (
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
+              ))}
+              <option value="unknown">Unknown Genre</option>
+            </select>
+
+            <label htmlFor="recommendations-sort">
+              Sort by
+            </label>
+
+            <select
+              id="recommendations-sort"
+              value={sortOrder}
+              onChange={(event) => setSortOrder(event.target.value)}
+            >
+              <option value="score-desc">Highest match first</option>
+              <option value="score-asc">Lowest match first</option>
+              <option value="popularity-desc">Highest popularity first</option>
+              <option value="popularity-asc">Lowest popularity first</option>
+            </select>
+          </div>
+
+          {sortedRecommendations.length === 0 ? (
+            <div className="recommendations-state" role="status">
+              <h2>No matching recommendations</h2>
+              <p>
+                No songs match the selected genre.
+                Try another genre or view all recommendations.
+              </p>
+              <button
+                type="button"
+                className="recommendations-retry-button"
+                onClick={() => setGenreFilter("all")}
+              >
+                Show All Genres
+              </button>
+            </div>
+          ) : (
+            <div className="recommendations-grid">
+              {sortedRecommendations.map((recommendation, index) => (
+                <RecommendationCard
+                  key={recommendation.id ?? index}
+                  recommendation={recommendation}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </section>
   );

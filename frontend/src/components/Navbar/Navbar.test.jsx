@@ -115,10 +115,13 @@ describe("Phase 2 - Responsive Navbar", () => {
   test("preserves the accessible theme toggle", () => {
     renderNavbar();
 
-    expect(
-      screen.getByRole("button", {
-        name: /Switch to (light|dark) mode/,
-      })
-    ).toBeTruthy();
+    const themeSwitch = screen.getByRole("switch", {
+      name: "Dark mode",
+    });
+
+    expect(themeSwitch).toBeTruthy();
+    expect(["true", "false"]).toContain(
+      themeSwitch.getAttribute("aria-checked")
+    );
   });
 });

@@ -1,77 +1,97 @@
-
 .recommendation-card {
-  border: 1px solid #d7d7d7;
-  border-radius: 12px;
-  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow-wrap: anywhere;
+}
+
+.recommendation-card-artwork {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-surface-hover);
+}
+
+.recommendation-card-artwork img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recommendation-card-artwork-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--color-text-muted);
+  font-size: 3rem;
+}
+
+.recommendation-card-body {
+  padding: var(--space-5);
 }
 
 .recommendation-card-heading {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
   align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.recommendation-card-heading > div {
+  min-width: 0;
 }
 
 .recommendation-card-heading h2 {
-  margin: 0 0 0.25rem;
-  font-size: 1.2rem;
+  margin: 0 0 var(--space-1);
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
 }
 
 .recommendation-card-heading p {
   margin: 0;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
 }
 
 .recommendation-score {
-  white-space: nowrap;
+  flex-shrink: 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-hover);
+  color: var(--color-accent);
   font-size: 0.85rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .recommendation-details {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 1.25rem 0 0;
+  gap: var(--space-4);
+  margin: var(--space-5) 0 0;
 }
 
-.recommendation-details div {
+.recommendation-details > div {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  min-width: 0;
+  gap: var(--space-1);
 }
 
 .recommendation-details dt {
+  color: var(--color-text-muted);
   font-size: 0.8rem;
   font-weight: 700;
 }
 
 .recommendation-details dd {
   margin: 0;
-}
-
-/* Prevent long song metadata from overflowing cards */
-.recommendation-card {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-/* Allow the song information to shrink within the heading */
-.recommendation-card-heading > div {
-  min-width: 0;
-}
-
-/* Keep song titles and artist names inside the card */
-.recommendation-card-heading h2,
-.recommendation-card-heading p {
-  overflow-wrap: anywhere;
-}
-
-/* Prevent metadata values from stretching the details grid */
-.recommendation-details > div {
-  min-width: 0;
-}
-
-.recommendation-details dd {
   overflow-wrap: anywhere;
 }
 
@@ -82,5 +102,55 @@
 
   .recommendation-details {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Recommendation loading skeletons */
+
+.recommendation-card-skeleton {
+  pointer-events: none;
+}
+
+.recommendation-card-skeleton .skeleton-block {
+  background: var(--color-surface-hover);
+  border-radius: var(--radius-sm);
+  animation: recommendation-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.recommendation-skeleton-title {
+  width: 85%;
+  height: 1.25rem;
+  margin-bottom: var(--space-3);
+}
+
+.recommendation-skeleton-artist {
+  width: 60%;
+  height: 1rem;
+}
+
+.recommendation-skeleton-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.recommendation-skeleton-details .skeleton-block {
+  height: 2rem;
+}
+
+@keyframes recommendation-skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recommendation-card-skeleton .skeleton-block {
+    animation: none;
   }
 }

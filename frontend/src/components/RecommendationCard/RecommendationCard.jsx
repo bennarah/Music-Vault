@@ -52,6 +52,25 @@ function RecommendationCard({ recommendation }) {
 
   return (
     <article className="recommendation-card">
+      <div className="recommendation-card-artwork">
+        {typeof recommendation?.albumImageUrl === "string" &&
+        recommendation.albumImageUrl.trim() ? (
+          <img
+            src={recommendation.albumImageUrl}
+            alt={`${recommendation.albumName || title} cover`}
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className="recommendation-card-artwork-placeholder"
+            aria-hidden="true"
+          >
+            ♪
+          </div>
+        )}
+      </div>
+
+      <div className="recommendation-card-body">
       <div className="recommendation-card-heading">
         <div>
           <h2>{title}</h2>
@@ -86,6 +105,7 @@ function RecommendationCard({ recommendation }) {
           <dd>{formatDuration(recommendation?.durationMs)}</dd>
         </div>
       </dl>
+      </div>
     </article>
   );
 }
