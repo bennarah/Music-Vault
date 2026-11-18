@@ -32,19 +32,26 @@ function Navbar() {
         </NavLink>
 
         <div className="navbar-actions">
-          <button
-            type="button"
-            className="navbar-theme-toggle"
-            onClick={toggleTheme}
-            aria-label={
-              theme === "dark"
-                ? "Switch to light mode"
-                : "Switch to dark mode"
-            }
-            aria-pressed={theme === "dark"}
-          >
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
-          </button>
+          <div className="navbar-theme-control">
+            <span className="navbar-theme-icon" aria-hidden="true">
+              ☀
+            </span>
+
+            <button
+              type="button"
+              role="switch"
+              className="navbar-theme-toggle"
+              aria-label="Dark mode"
+              aria-checked={theme === "dark"}
+              onClick={toggleTheme}
+            >
+              <span className="navbar-theme-thumb" aria-hidden="true" />
+            </button>
+
+            <span className="navbar-theme-icon" aria-hidden="true">
+              ☾
+            </span>
+          </div>
 
           <button
             type="button"

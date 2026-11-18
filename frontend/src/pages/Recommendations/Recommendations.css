@@ -103,3 +103,118 @@
     padding: 1rem;
   }
 }
+/* Recommendation filtering and sorting toolbar */
+
+.recommendations-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.recommendations-toolbar label {
+  font-weight: 600;
+}
+
+.recommendations-toolbar select {
+  min-height: 44px;
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.recommendations-toolbar select:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Recommendation skeleton loading layout */
+
+.recommendations-loading {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.recommendations-loading-message {
+  color: var(--color-text-muted);
+}
+
+.recommendations-loading-message h2 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text);
+  font-size: 1.1rem;
+}
+
+.recommendations-loading-message p {
+  margin: 0;
+}
+
+/* Phase 4 - Recommendations UX refinements */
+
+.recommendations-page {
+  width: 100%;
+  max-width: 1100px;
+  padding: var(--space-6) 0;
+}
+
+.recommendations-state {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.recommendations-state p {
+  max-width: 520px;
+  margin-inline: auto;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.recommendations-empty-link,
+.recommendations-retry-button {
+  min-height: 44px;
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+.recommendations-empty-link:hover,
+.recommendations-retry-button:hover {
+  background: var(--color-accent-hover);
+  color: var(--color-accent-text);
+}
+
+.recommendations-toolbar {
+  justify-content: flex-start;
+}
+
+.recommendations-toolbar select {
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .recommendations-page {
+    padding: var(--space-4) 0;
+  }
+
+  .recommendations-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+
+  .recommendations-toolbar select {
+    width: 100%;
+    margin-bottom: var(--space-3);
+  }
+
+  .recommendations-state {
+    padding: var(--space-5);
+  }
+}

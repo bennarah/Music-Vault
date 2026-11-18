@@ -40,6 +40,54 @@ describe("Phase 2 - MusicVault Theme Management", () => {
     document.documentElement.removeAttribute("data-theme");
   });
 
+  test("theme switch updates its accessible checked state", async () => {
+    renderNavbar();
+
+    const themeSwitch = screen.getByRole("switch", {
+      name: "Dark mode",
+    });
+
+    expect(themeSwitch.getAttribute("aria-checked")).toBe("false");
+
+    fireEvent.click(themeSwitch);
+
+    await waitFor(() => {
+      expect(themeSwitch.getAttribute("aria-checked")).toBe("true");
+      expect(document.documentElement.dataset.theme).toBe("dark");
+    });
+
+    fireEvent.click(themeSwitch);
+
+    await waitFor(() => {
+      expect(themeSwitch.getAttribute("aria-checked")).toBe("false");
+      expect(document.documentElement.dataset.theme).toBe("light");
+    });
+  });
+
+  test("theme switch updates its accessible checked state", async () => {
+    renderNavbar();
+
+    const themeSwitch = screen.getByRole("switch", {
+      name: "Dark mode",
+    });
+
+    expect(themeSwitch.getAttribute("aria-checked")).toBe("false");
+
+    fireEvent.click(themeSwitch);
+
+    await waitFor(() => {
+      expect(themeSwitch.getAttribute("aria-checked")).toBe("true");
+      expect(document.documentElement.dataset.theme).toBe("dark");
+    });
+
+    fireEvent.click(themeSwitch);
+
+    await waitFor(() => {
+      expect(themeSwitch.getAttribute("aria-checked")).toBe("false");
+      expect(document.documentElement.dataset.theme).toBe("light");
+    });
+  });
+
   test("restores a saved dark theme", () => {
     window.localStorage.setItem(STORAGE_KEY, "dark");
 
@@ -47,7 +95,7 @@ describe("Phase 2 - MusicVault Theme Management", () => {
 
     expect(document.documentElement.dataset.theme).toBe("dark");
     expect(
-      screen.getByRole("button", { name: "Switch to light mode" })
+      screen.getByRole("switch", { name: "Dark mode" })
     ).toBeTruthy();
   });
 
@@ -71,7 +119,7 @@ describe("Phase 2 - MusicVault Theme Management", () => {
     const { unmount } = renderNavbar();
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Switch to dark mode" })
+      screen.getByRole("switch", { name: "Dark mode" })
     );
 
     await waitFor(() => {
@@ -84,7 +132,7 @@ describe("Phase 2 - MusicVault Theme Management", () => {
 
     expect(document.documentElement.dataset.theme).toBe("dark");
     expect(
-      screen.getByRole("button", { name: "Switch to light mode" })
+      screen.getByRole("switch", { name: "Dark mode" })
     ).toBeTruthy();
   });
 
@@ -92,7 +140,7 @@ describe("Phase 2 - MusicVault Theme Management", () => {
     renderNavbar();
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Switch to dark mode" })
+      screen.getByRole("switch", { name: "Dark mode" })
     );
 
     await waitFor(() => {
@@ -101,7 +149,7 @@ describe("Phase 2 - MusicVault Theme Management", () => {
     });
 
     expect(
-      screen.getByRole("button", { name: "Switch to light mode" })
+      screen.getByRole("switch", { name: "Dark mode" })
     ).toBeTruthy();
   });
 });
