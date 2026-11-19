@@ -106,10 +106,12 @@ function calculateArtistFrequency(recommendations) {
 
 function calculateGenreDistribution(recommendations) {
     const genreCounts = new Map();
+    const validRecommendations =
+        getValidRecommendations(recommendations);
 
     let songsWithGenres = 0;
 
-    for (const result of getValidRecommendations(recommendations)) {
+    for (const result of validRecommendations) {
         const genres = Array.isArray(result.song.genres)
             ? result.song.genres
             : [];
@@ -145,7 +147,7 @@ function calculateGenreDistribution(recommendations) {
     return {
         songsWithGenres,
         songsWithoutGenres:
-            getValidRecommendations(recommendations).length -
+            validRecommendations.length -
             songsWithGenres,
 
         genres: Array.from(genreCounts.entries())
@@ -157,7 +159,10 @@ function calculateGenreDistribution(recommendations) {
                     totalGenreAssignments
                 ),
             }))
-            .sort((a, b) => b.count - a.count),
+            .sort((a, b) =>
+                b.count - a.count ||
+                (a.genre < b.genre ? -1 : a.genre > b.genre ? 1 : 0)
+            ),
     };
 }
 
