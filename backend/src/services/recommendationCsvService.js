@@ -28,7 +28,16 @@ function escapeCsvValue(value) {
     return "";
   }
 
-  const text = String(value);
+  let text = String(value);
+
+  // Prevent spreadsheet applications from interpreting
+  // untrusted CSV text as formulas.
+  if (
+    typeof value === "string" &&
+    /^[\s\uFEFF\u200B]*[=+@-]/u.test(text)
+  ) {
+    text = "'" + text;
+  }
 
   if (/[",\r\n]/.test(text)) {
     return `"${text.replace(/"/g, '""')}"`;
