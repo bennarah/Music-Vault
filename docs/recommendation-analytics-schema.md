@@ -85,6 +85,8 @@ Because a song may contain multiple genres, genre percentages use
 the total number of genre assignments as their denominator.
 
 Results are sorted by descending count.
+Genres with equal counts are sorted alphabetically by normalized
+genre name to ensure deterministic output.
 
 ## Explicit-Content Distribution
 
