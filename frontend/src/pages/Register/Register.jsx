@@ -10,6 +10,7 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [errorType, setErrorType] = useState(null);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -19,26 +20,31 @@ function Register() {
     if (submitting) return;
 
     setError("");
+    setErrorType(null);
     setMessage("");
 
     const cleanEmail = email.trim();
 
     if (!cleanEmail || !password || !confirmPassword) {
+      setErrorType("required");
       setError("Please complete all registration fields.");
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setErrorType("email");
       setError("Please enter a valid email address.");
       return;
     }
 
     if (password.length < 8) {
+      setErrorType("password-length");
       setError("Password must contain at least 8 characters.");
       return;
     }
 
     if (password !== confirmPassword) {
+      setErrorType("password-match");
       setError("Passwords do not match.");
       return;
     }
@@ -55,6 +61,7 @@ function Register() {
         "Your registration request was accepted. Account activation and sign-in are not yet available."
       );
     } catch (err) {
+      setErrorType("server");
       setError(getAuthErrorMessage(err));
     } finally {
       setSubmitting(false);
@@ -80,8 +87,22 @@ function Register() {
               id="register-email"
               type="email"
               autoComplete="email"
+              aria-invalid={
+                errorType === "email" ||
+                (errorType === "required" && !email.trim())
+              }
+              aria-describedby={
+                errorType === "email" ||
+                (errorType === "required" && !email.trim())
+                  ? "register-error"
+                  : undefined
+              }
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                setError("");
+                setErrorType(null);
+              }}
               disabled={submitting}
               required
             />
@@ -94,11 +115,24 @@ function Register() {
               type="password"
               autoComplete="new-password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                setError("");
+                setErrorType(null);
+              }}
               disabled={submitting}
               required
               minLength={8}
-              aria-describedby="register-password-help"
+              aria-invalid={
+                errorType === "password-length" ||
+                (errorType === "required" && !password)
+              }
+              aria-describedby={
+                errorType === "password-length" ||
+                (errorType === "required" && !password)
+                  ? "register-password-help register-error"
+                  : "register-password-help"
+              }
             />
             <p id="register-password-help" className="auth-help">
               Use at least 8 characters.
@@ -113,15 +147,29 @@ function Register() {
               id="register-confirm-password"
               type="password"
               autoComplete="new-password"
+              aria-invalid={
+                errorType === "password-match" ||
+                (errorType === "required" && !confirmPassword)
+              }
+              aria-describedby={
+                errorType === "password-match" ||
+                (errorType === "required" && !confirmPassword)
+                  ? "register-error"
+                  : undefined
+              }
               value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
+              onChange={(event) => {
+                setConfirmPassword(event.target.value);
+                setError("");
+                setErrorType(null);
+              }}
               disabled={submitting}
               required
             />
           </div>
 
           {error && (
-            <p className="auth-error" role="alert">
+            <p id="register-error" className="auth-error" role="alert">
               {error}
             </p>
           )}

@@ -9,6 +9,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [errorType, setErrorType] = useState(null);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -18,16 +19,19 @@ function Login() {
     if (submitting) return;
 
     setError("");
+    setErrorType(null);
     setMessage("");
 
     const cleanEmail = email.trim();
 
     if (!cleanEmail || !password) {
+      setErrorType("required");
       setError("Please enter your email and password.");
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setErrorType("email");
       setError("Please enter a valid email address.");
       return;
     }
@@ -44,6 +48,7 @@ function Login() {
         "Your sign-in request was accepted. Account session integration is not yet available."
       );
     } catch (err) {
+      setErrorType("server");
       setError(getAuthErrorMessage(err));
     } finally {
       setSubmitting(false);
@@ -68,8 +73,22 @@ function Login() {
               id="login-email"
               type="email"
               autoComplete="email"
+              aria-invalid={
+                errorType === "email" ||
+                (errorType === "required" && !email.trim())
+              }
+              aria-describedby={
+                errorType === "email" ||
+                (errorType === "required" && !email.trim())
+                  ? "login-error"
+                  : undefined
+              }
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                setError("");
+                setErrorType(null);
+              }}
               disabled={submitting}
               required
             />
@@ -81,15 +100,25 @@ function Login() {
               id="login-password"
               type="password"
               autoComplete="current-password"
+              aria-invalid={errorType === "required" && !password}
+              aria-describedby={
+                errorType === "required" && !password
+                  ? "login-error"
+                  : undefined
+              }
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                setError("");
+                setErrorType(null);
+              }}
               disabled={submitting}
               required
             />
           </div>
 
           {error && (
-            <p className="auth-error" role="alert">
+            <p id="login-error" className="auth-error" role="alert">
               {error}
             </p>
           )}

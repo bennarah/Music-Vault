@@ -183,6 +183,138 @@ describe("Phase 5 - Register Page", () => {
     );
   });
 
+  test("marks all missing registration fields invalid", async () => {
+    const user = userEvent.setup();
+    renderRegister();
+
+    await user.click(screen.getByRole("button", {
+      name: "Create Account",
+    }));
+
+    for (const name of ["Email address", "Password", "Confirm password"]) {
+      const field = screen.getByLabelText(name);
+      expect(field).toHaveAttribute("aria-invalid", "true");
+      expect(field.getAttribute("aria-describedby"))
+        .toContain("register-error");
+    }
+
+    expect(screen.getByRole("alert"))
+      .toHaveAttribute("id", "register-error");
+  });
+
+  test("associates invalid email errors with email only", async () => {
+    const user = userEvent.setup();
+    renderRegister();
+
+    await fillRegister(user, "invalid-email", "password123", "password123");
+    await user.click(screen.getByRole("button", {
+      name: "Create Account",
+    }));
+
+    expect(screen.getByLabelText("Email address"))
+      .toHaveAttribute("aria-invalid", "true");
+
+    expect(screen.getByLabelText("Password"))
+      .toHaveAttribute("aria-invalid", "false");
+
+    expect(screen.getByLabelText("Confirm password"))
+      .toHaveAttribute("aria-invalid", "false");
+  });
+
+  test("associates short password errors with password help", async () => {
+    const user = userEvent.setup();
+    renderRegister();
+
+    await fillRegister(user, "test@example.com", "short", "short");
+    await user.click(screen.getByRole("button", {
+      name: "Create Account",
+    }));
+
+    const password = screen.getByLabelText("Password");
+
+    expect(password).toHaveAttribute("aria-invalid", "true");
+    expect(password).toHaveAttribute(
+      "aria-describedby",
+      "register-password-help register-error"
+    );
+
+    expect(screen.getByLabelText("Confirm password"))
+      .toHaveAttribute("aria-invalid", "false");
+  });
+
+  test("marks confirmation invalid when passwords differ", async () => {
+    const user = userEvent.setup();
+    renderRegister();
+
+    await fillRegister(
+      user,
+      "test@example.com",
+      "password123",
+      "different123"
+    );
+
+    await user.click(screen.getByRole("button", {
+      name: "Create Account",
+    }));
+
+    expect(screen.getByLabelText("Confirm password"))
+      .toHaveAttribute("aria-invalid", "true");
+
+    expect(screen.getByLabelText("Password"))
+      .toHaveAttribute("aria-invalid", "false");
+  });
+
+  test("does not invalidate fields after backend errors", async () => {
+    const user = userEvent.setup();
+
+    register.mockRejectedValue(
+      new Error("API request failed: 404")
+    );
+
+    renderRegister();
+
+    await fillRegister(
+      user,
+      "test@example.com",
+      "password123",
+      "password123"
+    );
+
+    await user.click(screen.getByRole("button", {
+      name: "Create Account",
+    }));
+
+    await screen.findByRole("alert");
+
+    for (const name of ["Email address", "Password", "Confirm password"]) {
+      expect(screen.getByLabelText(name))
+        .toHaveAttribute("aria-invalid", "false");
+    }
+
+    expect(screen.getByLabelText("Password"))
+      .toHaveAttribute("aria-describedby", "register-password-help");
+  });
+
+  test("clears validation errors when fields are edited", async () => {
+    const user = userEvent.setup();
+    renderRegister();
+
+    await user.click(screen.getByRole("button", {
+      name: "Create Account",
+    }));
+
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+
+    await user.type(
+      screen.getByLabelText("Email address"),
+      "test@example.com"
+    );
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Email address"))
+      .toHaveAttribute("aria-invalid", "false");
+  });
+
   test("disables submission while registration is pending", async () => {
     const user = userEvent.setup();
 

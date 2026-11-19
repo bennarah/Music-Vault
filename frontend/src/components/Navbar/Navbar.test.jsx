@@ -112,6 +112,38 @@ describe("Phase 2 - Responsive Navbar", () => {
     expect(activeLink.getAttribute("aria-current")).toBe("page");
   });
 
+  test("Escape closes the menu and restores button focus", () => {
+    renderNavbar();
+
+    const openButton = document.querySelector(
+      ".navbar-menu-toggle"
+    );
+
+    expect(openButton).not.toBeNull();
+
+    // Simulate the menu button being visible at mobile width.
+    openButton.style.display = "inline-flex";
+
+    fireEvent.click(openButton);
+
+    expect(openButton).toHaveAttribute("aria-expanded", "true");
+
+    const dashboardLink = screen.getByRole("link", {
+      name: "Dashboard",
+    });
+
+    dashboardLink.focus();
+
+    fireEvent.keyDown(dashboardLink, {
+      key: "Escape",
+      code: "Escape",
+    });
+
+    expect(openButton).toHaveAttribute("aria-expanded", "false");
+    expect(openButton).toHaveAttribute("aria-label", "Open menu");
+    expect(openButton).toHaveFocus();
+  });
+
   test("preserves the accessible theme toggle", () => {
     renderNavbar();
 

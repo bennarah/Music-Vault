@@ -48,7 +48,7 @@ function Home() {
         <div className="home-hero-image">
           <img
             src={heroImage}
-            alt="MusicVault music discovery illustration"
+            alt="Vinyl record beside colorful album covers"
             width="343"
             height="361"
           />

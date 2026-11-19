@@ -28,7 +28,7 @@ describe("Phase 5 - Home Page", () => {
     renderHome();
 
     const image = screen.getByRole("img", {
-      name: "MusicVault music discovery illustration",
+      name: "Vinyl record beside colorful album covers",
     });
 
     expect(image).toBeInTheDocument();
