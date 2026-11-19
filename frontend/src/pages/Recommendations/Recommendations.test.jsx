@@ -285,4 +285,43 @@ describe("Recommendations Page", () => {
       document.querySelectorAll(".recommendation-score")
     ).toHaveLength(0);
   });
+
+  test("displays album and formatted duration metadata", async () => {
+    const mockRecommendations = [
+      {
+        id: "metadata-candidate-001",
+        title: "Example Song",
+        artist: "Example Artist",
+        genre: "rock",
+        popularity: 75,
+        score: 85,
+        albumName: "Example Album",
+        durationMs: 205000,
+      },
+    ];
+
+    getRecommendations.mockResolvedValue(mockRecommendations);
+
+    render(
+      <MemoryRouter>
+        <Recommendations />
+      </MemoryRouter>
+    );
+
+    expect(
+      await screen.findByText("Example Song")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Example Album")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText("3:25")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText("85% match")
+    ).toBeInTheDocument();
+  });
 });
