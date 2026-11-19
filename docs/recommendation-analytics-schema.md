@@ -66,6 +66,8 @@ Artists are grouped by Spotify artist ID when available.
 Otherwise, normalized lowercase artist names are used for grouping.
 
 Results are sorted by descending count.
+Artists with equal counts are sorted alphabetically by artist name,
+ignoring capitalization, to ensure deterministic output.
 
 ## Genre Distribution
 

@@ -96,7 +96,18 @@ function calculateArtistFrequency(recommendations) {
             ...artist,
             percentage: percentage(artist.count, total),
         }))
-        .sort((a, b) => b.count - a.count);
+        .sort((a, b) => {
+            const countDifference = b.count - a.count;
+
+            if (countDifference !== 0) {
+                return countDifference;
+            }
+
+            const nameA = a.artistName.toLowerCase();
+            const nameB = b.artistName.toLowerCase();
+
+            return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+        });
 }
 
 
