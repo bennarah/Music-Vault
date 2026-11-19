@@ -1,6 +1,7 @@
 const {
   generateRecommendationCsv,
   CSV_HEADERS,
+  escapeCsvValue,
 } = require("../src/services/recommendationCsvService");
 
 describe("SCRUM-108 Recommendation CSV Generation", () => {
@@ -143,5 +144,55 @@ describe("SCRUM-111 CSV Special Characters and Missing Metadata", () => {
     expect(lines).toHaveLength(2);
     expect(lines[0]).toBe(CSV_HEADERS.join(","));
     expect(lines[1]).toBe(",,,,,50,,");
+  });
+});
+
+describe("SCRUM-116 CSV Formula Injection Protection", () => {
+  test.each([
+    "=1+1",
+    "+SUM(1,2)",
+    "-1+2",
+    "@SUM(1,2)",
+    "  =1+1",
+    "\t=1+1",
+  ])("protects formula-like text: %s", (value) => {
+    const csv = generateRecommendationCsv([
+      {
+        song: {
+          title: value,
+          artistName: "Safe Artist",
+        },
+        score: 80,
+      },
+    ]);
+
+    const protectedValue = "'" + value;
+    const expectedField = /[",\r\n]/.test(protectedValue)
+      ? `"${protectedValue.replace(/"/g, '""')}"`
+      : protectedValue;
+
+    expect(csv).toContain(
+      `\r\n${expectedField},Safe Artist`
+    );
+  });
+
+  test("protects artist names without changing numeric scores", () => {
+    const csv = generateRecommendationCsv([
+      {
+        song: {
+          title: "Safe Song",
+          artistName: "=HYPERLINK(1,2)",
+          durationMs: 210000,
+        },
+        score: 95,
+      },
+    ]);
+
+    expect(csv).toContain(
+      "Safe Song,'=HYPERLINK(1,2)"
+        .replace("'=HYPERLINK(1,2)", "\"'=HYPERLINK(1,2)\"")
+    );
+
+    expect(csv).toContain(",210000,95,");
   });
 });
