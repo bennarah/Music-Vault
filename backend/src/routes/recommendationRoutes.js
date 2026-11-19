@@ -12,6 +12,10 @@ const {
     generateRecommendationCsv,
 } = require("../services/recommendationCsvService");
 
+const {
+    generateRecommendationAnalytics,
+} = require("../services/analyticsService");
+
 const router = express.Router();
 
 
@@ -133,6 +137,58 @@ router.get("/:userId/export", async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Unable to export recommendations.",
+        });
+    }
+});
+
+// GET /api/recommendations/:userId/analytics
+// Returns aggregated recommendation statistics.
+
+router.get("/:userId/analytics", async (req, res) => {
+    const { userId } = req.params;
+
+    const validUserId =
+        typeof userId === "string" &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId);
+
+    if (!validUserId) {
+        return res.status(400).json({
+            success: false,
+            message: "A valid userId is required.",
+        });
+    }
+
+    const metrics = createPerformanceMetrics(
+        "recommendation_analytics"
+    );
+
+    try {
+        const { recommendations, outcome } =
+            await getRecommendationsForUser(userId, metrics);
+
+        const analytics =
+            generateRecommendationAnalytics(recommendations);
+
+        metrics.finish({
+            outcome,
+            statusCode: 200,
+        });
+
+        return res.status(200).json(analytics);
+    } catch (error) {
+        metrics.finish({
+            outcome: "error",
+            statusCode: 500,
+        });
+
+        console.error(
+            "Failed to generate recommendation analytics:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to generate recommendation analytics.",
         });
     }
 });
