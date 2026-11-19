@@ -5,6 +5,7 @@ function ManualSongInput({ onSubmit, saving = false }) {
     const [title, setTitle] = useState("");
     const [artist, setArtist] = useState("");
     const [error, setError] = useState("");
+    const [errorType, setErrorType] = useState(null);
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -13,11 +14,13 @@ function ManualSongInput({ onSubmit, saving = false }) {
         const cleanArtist = artist.trim();
 
         if (!cleanTitle || !cleanArtist) {
+            setErrorType("validation");
             setError("Please enter both a song title and artist.");
             return;
         }
 
         setError("");
+        setErrorType(null);
 
         try {
             await onSubmit({
@@ -28,6 +31,7 @@ function ManualSongInput({ onSubmit, saving = false }) {
             setTitle("");
             setArtist("");
         } catch (err) {
+            setErrorType("server");
             setError(err.message || "Unable to add song.");
         }
     }
@@ -44,9 +48,15 @@ function ManualSongInput({ onSubmit, saving = false }) {
                 id="manual-song-title"
                 type="text"
                 value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                onChange={(event) => {
+                    setTitle(event.target.value);
+                    setError("");
+                    setErrorType(null);
+                }}
                 placeholder="Enter song title"
                 disabled={saving}
+                aria-invalid={errorType === "validation" && !title.trim()}
+                aria-describedby={errorType === "validation" ? "manual-song-error" : undefined}
             />
 
             <label htmlFor="manual-song-artist">
@@ -57,12 +67,22 @@ function ManualSongInput({ onSubmit, saving = false }) {
                 id="manual-song-artist"
                 type="text"
                 value={artist}
-                onChange={(event) => setArtist(event.target.value)}
+                onChange={(event) => {
+                    setArtist(event.target.value);
+                    setError("");
+                    setErrorType(null);
+                }}
                 placeholder="Enter artist name"
                 disabled={saving}
+                aria-invalid={errorType === "validation" && !artist.trim()}
+                aria-describedby={errorType === "validation" ? "manual-song-error" : undefined}
             />
 
-            {error && <p role="alert">{error}</p>}
+            {error && (
+                <p id="manual-song-error" role="alert">
+                    {error}
+                </p>
+            )}
 
             <button type="submit" disabled={saving}>
                 {saving ? "Adding..." : "Add Song"}

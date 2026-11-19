@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useTheme } from "../../context/useTheme";
 import "./Navbar.css";
@@ -13,6 +13,14 @@ const navigationLinks = [
 function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef(null);
+
+  function handleMenuKeyDown(event) {
+    if (event.key === "Escape" && menuOpen) {
+      setMenuOpen(false);
+      menuButtonRef.current?.focus();
+    }
+  }
 
   function closeMenu() {
     setMenuOpen(false);
@@ -20,7 +28,11 @@ function Navbar() {
 
   return (
     <header className="site-header">
-      <nav className="navbar" aria-label="Main navigation">
+      <nav
+        className="navbar"
+        aria-label="Main navigation"
+        onKeyDown={handleMenuKeyDown}
+      >
         <NavLink
           to="/"
           end
@@ -62,6 +74,7 @@ function Navbar() {
           <button
             type="button"
             className="navbar-menu-toggle"
+            ref={menuButtonRef}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             aria-controls="navbar-links"

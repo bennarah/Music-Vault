@@ -132,6 +132,106 @@ describe("Phase 5 - Login Page", () => {
     );
   });
 
+  test("marks missing credentials as invalid", async () => {
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.click(
+      screen.getByRole("button", { name: "Sign In" })
+    );
+
+    const email = screen.getByRole("textbox", {
+      name: "Email address",
+    });
+    const password = screen.getByLabelText("Password");
+
+    expect(email).toHaveAttribute("aria-invalid", "true");
+    expect(password).toHaveAttribute("aria-invalid", "true");
+
+    expect(email).toHaveAttribute(
+      "aria-describedby",
+      "login-error"
+    );
+    expect(password).toHaveAttribute(
+      "aria-describedby",
+      "login-error"
+    );
+  });
+
+  test("associates invalid email errors with the email field", async () => {
+    const user = userEvent.setup();
+    renderLogin();
+
+    await fillLogin(user, "invalid-email", "password123");
+
+    await user.click(
+      screen.getByRole("button", { name: "Sign In" })
+    );
+
+    expect(
+      screen.getByRole("textbox", { name: "Email address" })
+    ).toHaveAttribute("aria-invalid", "true");
+
+    expect(
+      screen.getByLabelText("Password")
+    ).toHaveAttribute("aria-invalid", "false");
+
+    expect(
+      screen.getByRole("alert")
+    ).toHaveAttribute("id", "login-error");
+  });
+
+  test("does not invalidate fields after a backend error", async () => {
+    const user = userEvent.setup();
+
+    login.mockRejectedValue(
+      new Error("API request failed: 404")
+    );
+
+    renderLogin();
+
+    await fillLogin(user, "test@example.com", "password123");
+
+    await user.click(
+      screen.getByRole("button", { name: "Sign In" })
+    );
+
+    await screen.findByRole("alert");
+
+    const email = screen.getByRole("textbox", {
+      name: "Email address",
+    });
+    const password = screen.getByLabelText("Password");
+
+    expect(email).toHaveAttribute("aria-invalid", "false");
+    expect(password).toHaveAttribute("aria-invalid", "false");
+
+    expect(email).not.toHaveAttribute("aria-describedby");
+    expect(password).not.toHaveAttribute("aria-describedby");
+  });
+
+  test("clears validation errors when input is corrected", async () => {
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.click(
+      screen.getByRole("button", { name: "Sign In" })
+    );
+
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+
+    await user.type(
+      screen.getByRole("textbox", { name: "Email address" }),
+      "test@example.com"
+    );
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    expect(
+      screen.getByRole("textbox", { name: "Email address" })
+    ).toHaveAttribute("aria-invalid", "false");
+  });
+
   test("disables submission while the request is pending", async () => {
     const user = userEvent.setup();
 

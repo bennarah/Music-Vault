@@ -82,7 +82,7 @@
 
 .recommendations-empty-link:focus-visible,
 .recommendations-retry-button:focus-visible {
-  outline: 3px solid #2563eb;
+  outline: 3px solid var(--color-focus);
   outline-offset: 3px;
 }
 
