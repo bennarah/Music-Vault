@@ -6,6 +6,8 @@ import "./Recommendations.css";
 import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
 import RecommendationCardSkeleton from "../../components/RecommendationCard/RecommendationCardSkeleton";
 import { getRecommendations } from "../../services/recommendationService";
+import { getRecommendationAnalytics } from "../../services/analyticsApi";
+import RecommendationInsights from "../../components/RecommendationInsights/RecommendationInsights";
 import { mockRecommendations } from "../../mocks/recommendations";
 import { DEV_USER_ID } from "../../config/devUser";
 
@@ -39,6 +41,11 @@ function Recommendations() {
   const [retryCount, setRetryCount] = useState(0);
   const [sortOrder, setSortOrder] = useState("score-desc");
   const [genreFilter, setGenreFilter] = useState("all");
+  // Recommendation analytics load independently from song cards.
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState("");
+
 
   // Prevent updates from requests belonging to an older effect.
   const requestId = useRef(0);
@@ -85,6 +92,49 @@ function Recommendations() {
 
     return () => {
       requestId.current += 1;
+    };
+  }, [retryCount]);
+
+  // Load recommendation analytics independently from song cards.
+  useEffect(() => {
+    let active = true;
+
+    // Mock recommendations do not correspond to live backend analytics.
+    if (useMockRecommendations || !DEV_USER_ID) {
+      return () => {
+        active = false;
+      };
+    }
+
+    async function loadAnalytics() {
+      setAnalyticsLoading(true);
+      setAnalyticsError("");
+      setAnalytics(null);
+
+      try {
+        const result = await getRecommendationAnalytics(DEV_USER_ID);
+
+        if (active) {
+          setAnalytics(result);
+        }
+      } catch {
+        if (active) {
+          setAnalytics(null);
+          setAnalyticsError(
+            "Recommendation insights are temporarily unavailable."
+          );
+        }
+      } finally {
+        if (active) {
+          setAnalyticsLoading(false);
+        }
+      }
+    }
+
+    loadAnalytics();
+
+    return () => {
+      active = false;
     };
   }, [retryCount]);
 
@@ -216,6 +266,26 @@ function Recommendations() {
 
       {!loading && !error && recommendations.length > 0 && (
         <>
+          {!useMockRecommendations && (
+            <div className="recommendations-analytics">
+              {analyticsLoading && (
+                <p role="status">
+                  Loading recommendation insights...
+                </p>
+              )}
+
+              {!analyticsLoading && analyticsError && (
+                <p className="recommendations-analytics-error" role="status">
+                  {analyticsError}
+                </p>
+              )}
+
+              {!analyticsLoading && !analyticsError && analytics && (
+                <RecommendationInsights analytics={analytics} />
+              )}
+            </div>
+          )}
+
           <div className="recommendations-toolbar">
             <label htmlFor="recommendations-genre">
               Filter by genre
