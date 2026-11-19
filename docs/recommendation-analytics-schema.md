@@ -123,7 +123,15 @@ Each albumFrequency entry contains:
 
 Missing album names are excluded.
 
+Album names are grouped case-insensitively after trimming surrounding
+whitespace. The first encountered album name is preserved for display.
+
 Results are sorted by descending count.
+Albums with equal counts are sorted alphabetically by album name,
+ignoring capitalization, to ensure deterministic output.
+
+Album grouping currently uses album names rather than Spotify album IDs.
+Different albums sharing the same normalized title may be combined.
 
 ## Recommendation Score Statistics
 

@@ -266,24 +266,40 @@ function calculateAlbumFrequency(recommendations) {
             continue;
         }
 
-        albums.set(
-            albumName,
-            (albums.get(albumName) || 0) + 1
-        );
+        // Group case-insensitively while preserving display names.
+        const key = albumName.toLowerCase();
+
+        if (!albums.has(key)) {
+            albums.set(key, {
+                albumName,
+                count: 0,
+            });
+        }
+
+        albums.get(key).count += 1;
     }
 
     const total = Array.from(albums.values())
-        .reduce((sum, count) => sum + count, 0);
+        .reduce((sum, album) => sum + album.count, 0);
 
-    return Array.from(albums.entries())
-        .map(([albumName, count]) => ({
-            albumName,
-            count,
-            percentage: percentage(count, total),
+    return Array.from(albums.values())
+        .map(album => ({
+            ...album,
+            percentage: percentage(album.count, total),
         }))
-        .sort((a, b) => b.count - a.count);
-}
+        .sort((a, b) => {
+            const countDifference = b.count - a.count;
 
+            if (countDifference !== 0) {
+                return countDifference;
+            }
+
+            const nameA = a.albumName.toLowerCase();
+            const nameB = b.albumName.toLowerCase();
+
+            return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+        });
+}
 
 // Calculates recommendation score statistics.
 
