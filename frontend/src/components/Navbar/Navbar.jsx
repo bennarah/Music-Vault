@@ -4,11 +4,10 @@ import { useTheme } from "../../context/useTheme";
 import "./Navbar.css";
 
 const navigationLinks = [
-  { to: "/login", label: "Login" },
-  { to: "/register", label: "Register" },
+  { to: "/", label: "Home" },
   { to: "/dashboard", label: "Dashboard" },
-  { to: "/recommendations", label: "Recommendations" },
   { to: "/songs", label: "Select Songs" },
+  { to: "/recommendations", label: "Recommendations" },
 ];
 
 function Navbar() {
@@ -32,6 +31,13 @@ function Navbar() {
         </NavLink>
 
         <div className="navbar-actions">
+          <NavLink
+            to="/login"
+            className="navbar-login-button"
+            onClick={closeMenu}
+          >
+            Log In
+          </NavLink>
           <div className="navbar-theme-control">
             <span className="navbar-theme-icon" aria-hidden="true">
               ☀
