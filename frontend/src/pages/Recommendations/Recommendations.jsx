@@ -6,6 +6,7 @@ import "./Recommendations.css";
 import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
 import RecommendationCardSkeleton from "../../components/RecommendationCard/RecommendationCardSkeleton";
 import { getRecommendations } from "../../services/recommendationService";
+import { downloadRecommendationCsv } from "../../services/recommendationCsvApi";
 import { getRecommendationAnalytics } from "../../services/analyticsApi";
 import RecommendationInsights from "../../components/RecommendationInsights/RecommendationInsights";
 import { mockRecommendations } from "../../mocks/recommendations";
@@ -41,6 +42,9 @@ function Recommendations() {
   const [retryCount, setRetryCount] = useState(0);
   const [sortOrder, setSortOrder] = useState("score-desc");
   const [genreFilter, setGenreFilter] = useState("all");
+  const [csvDownloading, setCsvDownloading] = useState(false);
+  const [csvError, setCsvError] = useState("");
+
   // Recommendation analytics load independently from song cards.
   const [analytics, setAnalytics] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
@@ -198,6 +202,23 @@ function Recommendations() {
     });
   }, [filteredRecommendations, sortOrder]);
 
+  async function handleCsvDownload() {
+    if (csvDownloading) return;
+
+    setCsvDownloading(true);
+    setCsvError("");
+
+    try {
+      await downloadRecommendationCsv(DEV_USER_ID);
+    } catch {
+      setCsvError(
+        "Unable to download recommendations. Please try again."
+      );
+    } finally {
+      setCsvDownloading(false);
+    }
+  }
+
   function handleRetry() {
     if (!loading) {
       setRetryCount((count) => count + 1);
@@ -282,6 +303,28 @@ function Recommendations() {
 
               {!analyticsLoading && !analyticsError && analytics && (
                 <RecommendationInsights analytics={analytics} />
+              )}
+            </div>
+          )}
+
+          {!useMockRecommendations && (
+            <div className="recommendations-export">
+              <button
+                type="button"
+                className="recommendations-download-button"
+                onClick={handleCsvDownload}
+                disabled={csvDownloading}
+              >
+                {csvDownloading ? "Downloading CSV..." : "Download CSV"}
+              </button>
+
+              {csvError && (
+                <p
+                  className="recommendations-export-error"
+                  role="alert"
+                >
+                  {csvError}
+                </p>
               )}
             </div>
           )}
